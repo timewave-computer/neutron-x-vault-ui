@@ -1,13 +1,13 @@
-import { useState } from "react";
 import { WalletModal } from "./WalletModal";
+import { useWalletModal } from "../context/WalletModalContext";
 
 export function ConnectButton() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { openModal } = useWalletModal();
 
   return (
     <>
       <button
-        onClick={() => setIsModalOpen(true)}
+        onClick={openModal}
         className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-lg 
           bg-gradient-to-r from-indigo-500 to-purple-500 text-white
           hover:from-indigo-600 hover:to-purple-600
@@ -46,7 +46,7 @@ export function ConnectButton() {
         Connect Wallet
       </button>
 
-      <WalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <WalletModal />
     </>
   );
 }

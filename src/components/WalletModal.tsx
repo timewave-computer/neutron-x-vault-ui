@@ -1,14 +1,12 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { walletConfig, WalletType } from "../config/wallets";
+import { walletConfig } from "../config/wallets";
+import { useWalletModal } from "../context/WalletModalContext";
 
-interface WalletModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export function WalletModal() {
+  const { isOpen, closeModal } = useWalletModal();
 
-export function WalletModal({ isOpen, onClose }: WalletModalProps) {
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+    <Dialog.Root open={isOpen} onOpenChange={closeModal}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">

@@ -41,6 +41,11 @@
 
 - how to handle switching to custom network in EVM?
 
+### todos
+
+Define UI state transitions and edge cases
+Specify what happens on connection success or failure, how the modal updates, and behavior when no supported wallets are installed. Outlining loading states, error handling, and fallback flows will lead to a more robust implementation.
+
 ## phase 2
 
 Supporting signing. Based on the operation, sign with the approriate wallet. Unsure how this would be set up yet.
