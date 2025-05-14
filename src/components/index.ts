@@ -1,4 +1,4 @@
-export * from "./ConnectButton";
+export * from "./ConnectButtonAPPKIT";
 export * from "./Button";
 export * from "./Card";
 export * from "./Footer";

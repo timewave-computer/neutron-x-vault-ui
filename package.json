@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
+    "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.7",
     "@reown/appkit": "^1.6.8",
     "@reown/appkit-adapter-wagmi": "^1.6.8",

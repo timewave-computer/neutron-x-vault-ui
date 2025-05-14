@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton } from "@/components";
+import { ConnectButton } from "./ConnectButton";
 
 export function Header() {
   const pathname = usePathname();
