@@ -1,5 +1,7 @@
 "use client";
+import { wagmiConfig } from "@/config/wagmi.config";
 import { createContext, useContext, useState, ReactNode } from "react";
+import { WagmiProvider } from "wagmi";
 
 interface WalletModalContextType {
   isOpen: boolean;
@@ -19,7 +21,7 @@ export function WalletModalProvider({ children }: { children: ReactNode }) {
 
   return (
     <WalletModalContext.Provider value={{ isOpen, openModal, closeModal }}>
-      {children}
+      <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>
     </WalletModalContext.Provider>
   );
 }

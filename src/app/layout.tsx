@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Header, Footer } from "@/components";
-import { VaultsConfigProvider, ChainProviders, ToastProvider } from "@/context";
+import { VaultsConfigProvider, ToastProvider } from "@/context";
 import { Recursive } from "next/font/google";
 import { readVaultsConfig } from "@/lib";
 import { MobileDetection } from "@/components";
 import "./globals.css";
 import { WalletModalProvider } from "../context/WalletModalContext";
 
+import ReactQueryProviders from "@/context/ReactQueryProviders";
 const recursive = Recursive({
   subsets: ["latin"],
   display: "swap",
@@ -95,9 +96,8 @@ export default async function RootLayout({
             </p>
           </div>
         </div>
-
-        <WalletModalProvider>
-          <ChainProviders>
+        <ReactQueryProviders>
+          <WalletModalProvider>
             <VaultsConfigProvider vaultsConfig={vaultsConfig}>
               <MobileDetection>
                 <ToastProvider>
@@ -113,8 +113,8 @@ export default async function RootLayout({
                 </ToastProvider>
               </MobileDetection>
             </VaultsConfigProvider>
-          </ChainProviders>
-        </WalletModalProvider>
+          </WalletModalProvider>
+        </ReactQueryProviders>
       </body>
     </html>
   );
