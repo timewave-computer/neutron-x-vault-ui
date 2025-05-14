@@ -1,5 +1,5 @@
 "use client";
-import { wagmiConfig } from "@/config/wagmi.config";
+import { wagmiConfig } from "@/config";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 

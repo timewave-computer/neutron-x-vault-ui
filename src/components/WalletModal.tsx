@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { walletConfig } from "../config/wallets";
-import { useWalletModal } from "../context/WalletModalContext";
+import { walletConfig } from "@/config";
+import { useWalletModal } from "@/context";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
