@@ -1,18 +1,4 @@
-export enum WalletType {
-  EVM = "evm",
-  COSMOS = "cosmos",
-}
-
-export interface MinimalWallet {
-  displayName: string;
-  chainId: string;
-  onConnect?: () => Promise<void>;
-  address?: string;
-  disconnect?: () => Promise<void>;
-  walletType: WalletType;
-  isConnected: boolean;
-  isInstalled: boolean;
-}
+import { ChainType, MinimalWallet } from "@/types/wallet";
 
 export interface WalletConfig {
   evm: {
@@ -26,12 +12,13 @@ export interface WalletConfig {
 export const walletConfig: WalletConfig = {
   evm: {
     ethereum: {
-      displayName: "MetaMask",
-      chainId: "1", // Ethereum mainnet
-      walletType: WalletType.EVM,
-      isConnected: false,
-      isInstalled: true, // In reality, this would be checked dynamically
-      onConnect: async () => {
+      walletName: "MetaMask",
+      walletPrettyName: "MetaMask",
+      walletChainType: ChainType.Evm,
+      walletInfo: {
+        logo: "https://assets.coingecko.com/coins/images/1344/small/metamask.png?1696506784",
+      },
+      connect: async () => {
         console.log("Connecting to MetaMask...");
       },
       disconnect: async () => {
@@ -41,12 +28,13 @@ export const walletConfig: WalletConfig = {
   },
   cosmos: {
     neutron: {
-      displayName: "Keplr",
-      chainId: "neutron-1", // Neutron mainnet
-      walletType: WalletType.COSMOS,
-      isConnected: false,
-      isInstalled: true, // In reality, this would be checked dynamically
-      onConnect: async () => {
+      walletName: "Keplr",
+      walletPrettyName: "Keplr",
+      walletChainType: ChainType.Cosmos,
+      walletInfo: {
+        logo: "https://assets.coingecko.com/coins/images/1344/small/metamask.png?1696506784",
+      },
+      connect: async () => {
         console.log("Connecting to Keplr...");
       },
       disconnect: async () => {

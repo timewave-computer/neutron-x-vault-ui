@@ -18,6 +18,7 @@ const wagmiChainConfig: WagmiChainParameters = networks.map((network) => ({
 export const wagmiConfig = createConfig({
   // Define available blockchain networks
   chains: wagmiChainConfig,
+  ssr: true, // for nextjs hydration errors
   // Configure network transport methods
   // transports:wagmiTransportConfig,
   client({ chain }) {

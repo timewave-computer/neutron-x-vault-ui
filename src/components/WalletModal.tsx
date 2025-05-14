@@ -1,9 +1,36 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { walletConfig } from "@/config";
 import { useWalletModal } from "@/context";
+import { useWalletList } from "@/hooks";
+import { ChainType } from "@/types/wallet";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
+
+  const wallets = useWalletList();
+
+  const renderWalletList = (chainType: "evm" | "cosmos") => {
+    return wallets
+      .filter((w) => w.walletChainType === chainType)
+      .map((wallet) => (
+        <button
+          key={`${wallet.walletName}-${wallet.walletChainType}`}
+          onClick={() => wallet.connect()}
+          disabled={!wallet.isAvailable}
+          className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+        >
+          <span className="font-medium">{wallet.walletPrettyName}</span>
+          <span
+            className={`text-xs px-2 py-1 rounded ${
+              wallet.isAvailable
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {wallet.isAvailable ? "Available" : "Not Available"}
+          </span>
+        </button>
+      ));
+  };
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={closeModal}>
@@ -20,27 +47,7 @@ export function WalletModal() {
               <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
                 Connect EVM Wallet
               </h4>
-              <div className="space-y-2">
-                {Object.entries(walletConfig.evm).map(([key, wallet]) => (
-                  <button
-                    key={key}
-                    onClick={wallet.onConnect}
-                    disabled={!wallet.isInstalled}
-                    className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                  >
-                    <span className="font-medium">{wallet.displayName}</span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        wallet.isInstalled
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {wallet.isInstalled ? "Installed" : "Not Installed"}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <div className="space-y-2">{renderWalletList(ChainType.Evm)}</div>
             </div>
 
             {/* Cosmos Section */}
@@ -49,25 +56,7 @@ export function WalletModal() {
                 Connect Cosmos Wallet
               </h4>
               <div className="space-y-2">
-                {Object.entries(walletConfig.cosmos).map(([key, wallet]) => (
-                  <button
-                    key={key}
-                    onClick={wallet.onConnect}
-                    disabled={!wallet.isInstalled}
-                    className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                  >
-                    <span className="font-medium">{wallet.displayName}</span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        wallet.isInstalled
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {wallet.isInstalled ? "Installed" : "Not Installed"}
-                    </span>
-                  </button>
-                ))}
+                {renderWalletList(ChainType.Cosmos)}
               </div>
             </div>
           </div>
