@@ -3,3 +3,6 @@ export * from "./useViewAllVaults";
 export * from "./useVaultContract";
 export * from "./useVaultLogs";
 export * from "./useConvertToAssets";
+export * from "./useCreateEvmWallets";
+export * from "./useCreateCosmosWallets";
+export * from "./useWalletlist";

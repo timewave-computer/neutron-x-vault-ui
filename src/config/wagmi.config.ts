@@ -1,14 +1,4 @@
-"use client";
-
-import { type ReactNode } from "react";
-import {
-  CreateConfigParameters,
-  WagmiProvider,
-  createConfig,
-  http,
-} from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AppKitProvider } from "@/context";
+import { CreateConfigParameters, createConfig, http } from "wagmi";
 import { networks } from "@/config";
 import { createClient } from "viem";
 
@@ -25,9 +15,10 @@ const wagmiChainConfig: WagmiChainParameters = networks.map((network) => ({
 })) as unknown as WagmiChainParameters;
 
 // Configure Wagmi client for Ethereum interactions
-const wagmiConfig = createConfig({
+export const wagmiConfig = createConfig({
   // Define available blockchain networks
   chains: wagmiChainConfig,
+  ssr: true, // for nextjs hydration errors
   // Configure network transport methods
   // transports:wagmiTransportConfig,
   client({ chain }) {
@@ -37,14 +28,3 @@ const wagmiConfig = createConfig({
     });
   },
 });
-
-/**
- * Root provider component that wraps the application
- * Sets up:
- * - Wagmi for Ethereum interactions
- * - React Query for data fetching
- * - AppKit for wallet connection and UI
- */
-export function ChainProviders({ children }: { children: ReactNode }) {
-  return <WagmiProvider config={wagmiConfig}></WagmiProvider>;
-}

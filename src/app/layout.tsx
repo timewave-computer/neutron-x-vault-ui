@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Header, Footer } from "@/components";
-import { VaultsConfigProvider, ChainProviders, ToastProvider } from "@/context";
+import { Header, Footer, MobileDetection, Background } from "@/components";
+import {
+  VaultsConfigProvider,
+  ToastProvider,
+  WalletModalProvider,
+} from "@/context";
 import { Recursive } from "next/font/google";
 import { readVaultsConfig } from "@/lib";
-import { MobileDetection } from "@/components";
 import "./globals.css";
-import { WalletModalProvider } from "../context/WalletModalContext";
 
+import ReactQueryProviders from "@/context/ReactQueryProviders";
 const recursive = Recursive({
   subsets: ["latin"],
   display: "swap",
@@ -60,44 +63,10 @@ export default async function RootLayout({
         className={`${recursive.className} min-h-screen bg-white antialiased`}
       >
         {/* Background pattern - positioned at the bottom-most layer */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-50">
-          <div className="absolute inset-0">
-            {/* Top row */}
-            <p className="absolute -left-24 top-[8%] font-beast text-[42rem] text-accent-purple-light whitespace-pre tracking-[0.2em] rotate-[0deg]">
-              ^^^~
-            </p>
-            <p className="absolute right-[-15%] top-[5%] font-beast text-[40rem] text-accent-purple-light whitespace-pre tracking-[0.25em] rotate-[90deg]">
-              ~~~~
-            </p>
-
-            {/* Middle row */}
-            <p className="absolute left-[8%] top-[35%] font-beast text-[44rem] text-accent-purple-light whitespace-pre tracking-[0.15em] rotate-[180deg]">
-              ^^^
-            </p>
-            <p className="absolute right-[12%] top-[38%] font-beast text-[38rem] text-accent-purple-light whitespace-pre tracking-[0.2em] rotate-[270deg]">
-              ~~~
-            </p>
-
-            {/* Lower middle row */}
-            <p className="absolute -left-32 top-[65%] font-beast text-[46rem] text-accent-purple-light whitespace-pre tracking-[0.18em] rotate-[0deg]">
-              ^^^^
-            </p>
-            <p className="absolute right-[-20%] top-[62%] font-beast text-[40rem] text-accent-purple-light whitespace-pre tracking-[0.22em] rotate-[90deg]">
-              ~~~
-            </p>
-
-            {/* Bottom row */}
-            <p className="absolute left-[15%] bottom-[8%] font-beast text-[42rem] text-accent-purple-light whitespace-pre tracking-[0.15em] rotate-[180deg]">
-              ^^^~
-            </p>
-            <p className="absolute right-[18%] bottom-[12%] font-beast text-[44rem] text-accent-purple-light whitespace-pre tracking-[0.2em] rotate-[270deg]">
-              ~~~
-            </p>
-          </div>
-        </div>
-
+        <Background />
         <WalletModalProvider>
-          <ChainProviders>
+          {/* ReactQueryProviders must be inside WalletModalProvider (expected by WagmiProvider) */}
+          <ReactQueryProviders>
             <VaultsConfigProvider vaultsConfig={vaultsConfig}>
               <MobileDetection>
                 <ToastProvider>
@@ -113,7 +82,7 @@ export default async function RootLayout({
                 </ToastProvider>
               </MobileDetection>
             </VaultsConfigProvider>
-          </ChainProviders>
+          </ReactQueryProviders>
         </WalletModalProvider>
       </body>
     </html>
