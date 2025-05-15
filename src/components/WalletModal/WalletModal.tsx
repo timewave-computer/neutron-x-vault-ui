@@ -2,12 +2,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
 import { useWalletList } from "@/hooks";
 import { ChainType, MinimalWallet } from "@/types/wallet";
+import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
-  console.log("wallets", wallets);
 
   const getSectionTitle = (chainType: ChainType): string => {
     const isConnected = wallets.some(
@@ -41,21 +41,7 @@ export function WalletModal() {
     return walletsToRender.map((wallet) => {
       if (wallet.isWalletConnected) {
         return (
-          <div
-            key={`${wallet.walletName}-${wallet.walletChainType}-connected`}
-            className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg"
-          >
-            <div className="flex items-center space-x-3">
-              <WalletLogo wallet={wallet} />
-              <span className="font-medium">{wallet.walletPrettyName}</span>
-            </div>
-            <button
-              onClick={() => wallet.disconnect()}
-              className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors duration-200"
-            >
-              Disconnect
-            </button>
-          </div>
+          <ConnectedWalletDisplay key={wallet.walletName} wallet={wallet} />
         );
       }
 
@@ -94,23 +80,16 @@ export function WalletModal() {
           </Dialog.Title>
 
           <div className="space-y-6">
-            {/* EVM Section */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
-                {getSectionTitle(ChainType.Evm)}
-              </h4>
-              <div className="space-y-2">{renderWalletList(ChainType.Evm)}</div>
-            </div>
-
-            {/* Cosmos Section */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
-                {getSectionTitle(ChainType.Cosmos)}
-              </h4>
-              <div className="space-y-2">
-                {renderWalletList(ChainType.Cosmos)}
+            {Object.values(ChainType).map((chainType) => (
+              <div key={chainType}>
+                <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
+                  {getSectionTitle(chainType as ChainType)}
+                </h4>
+                <div className="space-y-2">
+                  {renderWalletList(chainType as "evm" | "cosmos")}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

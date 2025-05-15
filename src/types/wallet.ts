@@ -1,7 +1,6 @@
 export enum ChainType {
-  Cosmos = "cosmos",
   Evm = "evm",
-  Svm = "svm",
+  Cosmos = "cosmos",
 }
 
 export type MinimalWallet = {
@@ -13,6 +12,7 @@ export type MinimalWallet = {
   };
   connect: (chainId?: string) => Promise<void>;
   disconnect: () => Promise<void>;
+  getAddress: () => Promise<string>;
   isWalletConnected: boolean;
   isAvailable: boolean;
 };

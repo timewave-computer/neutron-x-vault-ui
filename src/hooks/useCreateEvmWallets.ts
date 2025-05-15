@@ -17,10 +17,6 @@ export const useCreateEvmWallets = () => {
     const wallets: MinimalWallet[] = [];
 
     connectors.forEach((connector) => {
-      // omit OKX, unsure why
-      if (connector.id === "com.okex.wallet") {
-        return;
-      }
       const isWalletFound =
         wallets.findIndex((wallet) => wallet.walletName === connector.id) !==
         -1;
@@ -67,14 +63,21 @@ export const useCreateEvmWallets = () => {
         walletInfo: {
           logo: connector.icon,
         },
+        isWalletConnected: connector.id === currentEvmConnector?.id,
+        isAvailable: true, // available because connector exists for EVM
         connect: async (chainId) => {
           await connectWallet({ chainIdToConnect: chainId });
         },
         disconnect: async () => {
           await disconnect(wagmiConfig);
         },
-        isWalletConnected: connector.id === currentEvmConnector?.id,
-        isAvailable: true, // available because connector exists for EVM
+        getAddress: async () => {
+          const account = await connector.getAccounts();
+          if (!account || account.length === 0) {
+            throw new Error("No account found");
+          }
+          return account[0];
+        },
       };
 
       wallets.push(minimalWallet);
