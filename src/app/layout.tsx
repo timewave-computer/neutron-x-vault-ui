@@ -64,9 +64,9 @@ export default async function RootLayout({
       >
         {/* Background pattern - positioned at the bottom-most layer */}
         <Background />
-        <WalletModalProvider>
-          {/* ReactQueryProviders must be inside WalletModalProvider (expected by WagmiProvider) */}
-          <ReactQueryProviders>
+        {/* ReactQueryProviders must be outside WalletModalProvider (expected by GrazProvider) */}
+        <ReactQueryProviders>
+          <WalletModalProvider>
             <VaultsConfigProvider vaultsConfig={vaultsConfig}>
               <MobileDetection>
                 <ToastProvider>
@@ -82,8 +82,8 @@ export default async function RootLayout({
                 </ToastProvider>
               </MobileDetection>
             </VaultsConfigProvider>
-          </ReactQueryProviders>
-        </WalletModalProvider>
+          </WalletModalProvider>
+        </ReactQueryProviders>
       </body>
     </html>
   );

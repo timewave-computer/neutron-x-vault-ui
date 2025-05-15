@@ -10,9 +10,8 @@ export type MinimalWallet = {
   walletInfo: {
     logo?: string;
   };
-  connect: (chainId?: string) => Promise<void>;
-  disconnect: () => Promise<void>;
+  connect: (chainId?: string) => Promise<{ address: string }>;
+  disconnect: (chainId?: string) => Promise<void>;
   getAddress: () => Promise<string>;
-  isWalletConnected: boolean;
   isAvailable: boolean;
 };

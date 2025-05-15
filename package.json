@@ -13,7 +13,8 @@
     "manage-key": "./scripts/manage-key.sh",
     "deploy-vaults": "./scripts/deploy-vaults.sh",
     "faucet": "./scripts/faucet.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "graz generate -g"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
