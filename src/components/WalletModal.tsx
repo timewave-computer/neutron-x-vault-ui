@@ -1,12 +1,13 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
 import { useWalletList } from "@/hooks";
-import { ChainType } from "@/types/wallet";
+import { ChainType, MinimalWallet } from "@/types/wallet";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
+  console.log("wallets", wallets);
 
   const getSectionTitle = (chainType: ChainType): string => {
     const isConnected = wallets.some(
@@ -45,13 +46,7 @@ export function WalletModal() {
             className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              {wallet.walletInfo.logo && (
-                <img
-                  src={wallet.walletInfo.logo}
-                  alt={wallet.walletPrettyName}
-                  className="w-6 h-6 rounded-full"
-                />
-              )}
+              <WalletLogo wallet={wallet} />
               <span className="font-medium">{wallet.walletPrettyName}</span>
             </div>
             <button
@@ -71,7 +66,10 @@ export function WalletModal() {
           disabled={!wallet.isAvailable}
           className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
-          <span className="font-medium">{wallet.walletPrettyName}</span>
+          <div className="flex items-center space-x-3">
+            <WalletLogo wallet={wallet} />
+            <span className="font-medium">{wallet.walletPrettyName}</span>
+          </div>
           <span
             className={`text-xs px-2 py-1 rounded ${
               wallet.isAvailable
@@ -119,3 +117,23 @@ export function WalletModal() {
     </Dialog.Root>
   );
 }
+
+const WalletLogo = ({ wallet }: { wallet: MinimalWallet }) => {
+  if (wallet.walletInfo.logo) {
+    return (
+      <img
+        src={wallet.walletInfo.logo}
+        alt={wallet.walletPrettyName}
+        className="w-6 h-6 rounded-md"
+      />
+    );
+  }
+
+  return (
+    <div className="w-6 h-6 bg-gray-200 rounded-md flex items-center justify-center">
+      <span className="text-sm font-medium">
+        {wallet.walletPrettyName.charAt(0)}
+      </span>
+    </div>
+  );
+};
