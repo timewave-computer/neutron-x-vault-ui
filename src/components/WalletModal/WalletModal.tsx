@@ -1,19 +1,21 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
-import { useWalletList } from "@/hooks";
+import { useAccounts, useWalletList } from "@/hooks";
 import { ChainType, MinimalWallet } from "@/types/wallet";
 import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
+import { getChainInfo, useAccount as useCosmosAccount } from "graz";
+import { useAccount as useEvmAccount } from "wagmi";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
 
+  const { cosmosAccounts, evmAccount, checkIsConnected } = useAccounts();
+
   const getSectionTitle = (chainType: ChainType): string => {
-    const isConnected = wallets.some(
-      (wallet) =>
-        wallet.walletChainType === chainType && wallet.isWalletConnected,
-    );
+    const isConnected = checkIsConnected(chainType);
+
     // Format chainType for display: EVM for "evm", Cosmos for "cosmos"
     const displayChainType =
       chainType === ChainType.Evm
@@ -30,8 +32,8 @@ export function WalletModal() {
     const walletsForChainType = wallets.filter(
       (w) => w.walletChainType === chainType,
     );
-    const connectedWalletForChainType = walletsForChainType.find(
-      (w) => w.isWalletConnected,
+    const connectedWalletForChainType = walletsForChainType.find((w) =>
+      checkIsConnected(w.walletChainType),
     );
 
     const walletsToRender = connectedWalletForChainType
@@ -39,10 +41,39 @@ export function WalletModal() {
       : walletsForChainType;
 
     return walletsToRender.map((wallet) => {
-      if (wallet.isWalletConnected) {
-        return (
-          <ConnectedWalletDisplay key={wallet.walletName} wallet={wallet} />
-        );
+      if (checkIsConnected(wallet.walletChainType)) {
+        if (wallet.walletChainType === ChainType.Evm) {
+          const address = evmAccount.address;
+          const chainName = evmAccount.chain?.name;
+          return (
+            <ConnectedWalletDisplay
+              key={wallet.walletName}
+              wallet={wallet}
+              chainName={chainName}
+              address={address}
+              onDisconnect={() => wallet.disconnect()}
+            />
+          );
+        } else {
+          return (
+            <div>
+              {cosmosAccounts?.map((account) => {
+                const chainName = getChainInfo({
+                  chainId: account.chainId,
+                })?.chainName;
+                return (
+                  <ConnectedWalletDisplay
+                    key={`${wallet.walletName}-${account.address}`}
+                    wallet={wallet}
+                    address={account.address}
+                    onDisconnect={() => wallet.disconnect(account.chainId)}
+                    chainName={chainName}
+                  />
+                );
+              })}
+            </div>
+          );
+        }
       }
 
       return (

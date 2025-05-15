@@ -63,10 +63,9 @@ export const useCreateEvmWallets = () => {
         walletInfo: {
           logo: connector.icon,
         },
-        isWalletConnected: connector.id === currentEvmConnector?.id,
         isAvailable: true, // available because connector exists for EVM
-        connect: async (chainId) => {
-          await connectWallet({ chainIdToConnect: chainId });
+        connect: async (chainId?: string) => {
+          return connectWallet({ chainIdToConnect: chainId });
         },
         disconnect: async () => {
           await disconnect(wagmiConfig);

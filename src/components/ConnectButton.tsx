@@ -1,5 +1,5 @@
-import { WalletModal } from "./WalletModal/WalletModal";
-import { useWalletModal } from "../context/WalletModalContext";
+import { WalletModal } from "@/components/WalletModal";
+import { useWalletModal } from "@/context";
 
 export function ConnectButton() {
   const { openModal } = useWalletModal();
