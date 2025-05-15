@@ -1,6 +1,6 @@
 import { MinimalWallet } from "@/types/wallet";
 import { useEffect, useState } from "react";
-import { shortenAddress } from "@/lib/helper/shorten-address";
+import { shortenAddress } from "@/lib";
 
 export function ConnectedWalletDisplay({ wallet }: { wallet: MinimalWallet }) {
   const [address, setAddress] = useState<string | null>(null);
