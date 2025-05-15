@@ -8,10 +8,63 @@ export function WalletModal() {
 
   const wallets = useWalletList();
 
+  const getSectionTitle = (chainType: ChainType): string => {
+    const isConnected = wallets.some(
+      (wallet) =>
+        wallet.walletChainType === chainType && wallet.isWalletConnected,
+    );
+    // Format chainType for display: EVM for "evm", Cosmos for "cosmos"
+    const displayChainType =
+      chainType === ChainType.Evm
+        ? "EVM"
+        : chainType.charAt(0).toUpperCase() + chainType.slice(1);
+    if (isConnected) {
+      return `${displayChainType} Wallet`;
+    } else {
+      return `Connect ${displayChainType} Wallet`;
+    }
+  };
+
   const renderWalletList = (chainType: "evm" | "cosmos") => {
-    return wallets
-      .filter((w) => w.walletChainType === chainType)
-      .map((wallet) => (
+    const walletsForChainType = wallets.filter(
+      (w) => w.walletChainType === chainType,
+    );
+    const connectedWalletForChainType = walletsForChainType.find(
+      (w) => w.isWalletConnected,
+    );
+
+    const walletsToRender = connectedWalletForChainType
+      ? [connectedWalletForChainType]
+      : walletsForChainType;
+
+    return walletsToRender.map((wallet) => {
+      if (wallet.isWalletConnected) {
+        return (
+          <div
+            key={`${wallet.walletName}-${wallet.walletChainType}-connected`}
+            className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              {wallet.walletInfo.logo && (
+                <img
+                  src={wallet.walletInfo.logo}
+                  alt={wallet.walletPrettyName}
+                  className="w-6 h-6 rounded-full"
+                />
+              )}
+              <span className="font-medium">{wallet.walletPrettyName}</span>
+            </div>
+            <button
+              onClick={() => wallet.disconnect()}
+              className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors duration-200"
+            >
+              Disconnect
+            </button>
+          </div>
+        );
+      }
+
+      return (
         <button
           key={`${wallet.walletName}-${wallet.walletChainType}`}
           onClick={() => wallet.connect()}
@@ -29,7 +82,8 @@ export function WalletModal() {
             {wallet.isAvailable ? "Available" : "Not Available"}
           </span>
         </button>
-      ));
+      );
+    });
   };
 
   return (
@@ -45,7 +99,7 @@ export function WalletModal() {
             {/* EVM Section */}
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
-                Connect EVM Wallet
+                {getSectionTitle(ChainType.Evm)}
               </h4>
               <div className="space-y-2">{renderWalletList(ChainType.Evm)}</div>
             </div>
@@ -53,7 +107,7 @@ export function WalletModal() {
             {/* Cosmos Section */}
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2 font-sans">
-                Connect Cosmos Wallet
+                {getSectionTitle(ChainType.Cosmos)}
               </h4>
               <div className="space-y-2">
                 {renderWalletList(ChainType.Cosmos)}
