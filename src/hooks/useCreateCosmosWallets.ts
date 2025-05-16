@@ -12,8 +12,6 @@ import { getChainInfo } from "@/const/chains";
 
 export const useCreateCosmosWallets = () => {
   const { disconnectAsync } = useDisconnect();
-  const { walletType: currentWallet } = useActiveWalletType();
-  console.log("currentWallet", currentWallet);
 
   const createCosmosWallets = useCallback(() => {
     const wallets: MinimalWallet[] = [];
