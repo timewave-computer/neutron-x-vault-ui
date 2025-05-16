@@ -7,3 +7,4 @@ export * from "./useCreateEvmWallets";
 export * from "./useCreateCosmosWallets";
 export * from "./useWalletlist";
 export * from "./useAccounts";
+export * from "./useWalletClient";

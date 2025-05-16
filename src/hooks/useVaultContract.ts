@@ -2,7 +2,6 @@ import {
   useReadContract,
   useAccount,
   usePublicClient,
-  useWalletClient,
   useConfig,
   useReadContracts,
 } from "wagmi";
@@ -11,8 +10,7 @@ import { type Address } from "viem";
 import { valenceVaultABI } from "@/const";
 import { formatBigInt, parseWithdrawRequest } from "@/lib";
 import { readContract } from "@wagmi/core";
-import { useConvertToAssets } from "@/hooks";
-
+import { useConvertToAssets, useWalletClient } from "@/hooks";
 const REFRESH_INTERVAL = 5000;
 
 /**
@@ -56,7 +54,7 @@ export function useVaultContract(
 
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
+  const { evm: walletClient } = useWalletClient();
   const config = useConfig();
   const now = new Date().getTime();
 
