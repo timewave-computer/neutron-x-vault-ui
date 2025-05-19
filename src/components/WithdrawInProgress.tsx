@@ -55,7 +55,7 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
             <div>
               <div className="space-y-1">
                 <p>{copy.description}</p>
-                <p className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
                   Why do I have to wait?
                   <Tooltip
                     content={
@@ -89,7 +89,7 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                       </div>
                     }
                   />
-                </p>
+                </div>
               </div>
             </div>
 

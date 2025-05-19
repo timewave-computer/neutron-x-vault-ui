@@ -1,4 +1,3 @@
-export * from "./ConnectButtonAPPKIT";
 export * from "./Button";
 export * from "./Card";
 export * from "./Footer";
@@ -14,3 +13,4 @@ export * from "./Tooltip";
 export * from "./WithdrawInProgress";
 export * from "./DepositInProgress";
 export * from "./Background";
+export * from "./WalletModal";

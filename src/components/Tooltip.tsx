@@ -13,14 +13,14 @@ export function Tooltip({ content, children }: TooltipProps) {
   return (
     <div className="relative inline-block">
       <div
-        className="inline-flex items-center cursor-help"
+        className="flex flex-col items-center cursor-help"
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
         onBlur={() => setIsVisible(false)}
       >
         {children || (
-          <div className="flex items-center justify-center w-4 h-4 text-xs text-gray-500 bg-transparent border border-gray-400 rounded-full">
+          <div className="flex items-center justify-center w-4 h-4 text-xs text-gray-500 bg-transparent border border-gray-400 rounded-full pt-0.5">
             ?
           </div>
         )}

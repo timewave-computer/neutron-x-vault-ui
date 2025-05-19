@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useViewAllVaults, useVaultContract, useTokenBalances } from "@/hooks";
-import { useAccount } from "wagmi";
+import {
+  useViewAllVaults,
+  useVaultContract,
+  useTokenBalances,
+  useAccounts,
+} from "@/hooks";
 import { useState } from "react";
 import { formatNumberString, isValidNumberInput } from "@/lib";
 import { useToast } from "@/context";
@@ -17,11 +21,11 @@ import {
 } from "@/components";
 
 export default function VaultPage({ params }: { params: { id: string } }) {
-  const { isConnected, address } = useAccount();
+  const { isConnected, evmAccount } = useAccounts();
   const { showToast } = useToast();
   const [depositInput, setDepositInput] = useState("");
   const [withdrawInput, setWithdrawInput] = useState("");
-
+  const address = evmAccount?.address;
   const {
     vaults,
     isLoading: isLoadingVaults,

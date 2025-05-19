@@ -3,8 +3,7 @@ import { useWalletModal } from "@/context";
 import { useAccounts, useWalletList } from "@/hooks";
 import { ChainType, MinimalWallet } from "@/types/wallet";
 import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
-import { getChainInfo, useAccount as useCosmosAccount } from "graz";
-import { useAccount as useEvmAccount } from "wagmi";
+import { getChainInfo } from "graz";
 
 export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
@@ -47,7 +46,7 @@ export function WalletModal() {
           const chainName = evmAccount.chain?.name;
           return (
             <ConnectedWalletDisplay
-              key={wallet.walletName}
+              key={`${wallet.walletName}-${wallet.walletChainType}`}
               wallet={wallet}
               chainName={chainName}
               address={address}
@@ -63,7 +62,7 @@ export function WalletModal() {
                 })?.chainName;
                 return (
                   <ConnectedWalletDisplay
-                    key={`${wallet.walletName}-${account.address}`}
+                    key={`${wallet.walletName}-${account.address}-${account.chainId}`}
                     wallet={wallet}
                     address={account.address}
                     onDisconnect={() => wallet.disconnect(account.chainId)}
@@ -94,7 +93,7 @@ export function WalletModal() {
                 : "bg-gray-100 text-gray-800"
             }`}
           >
-            {wallet.isAvailable ? "Available" : "Not Available"}
+            {wallet.isAvailable ? "Installed" : "Not Installed"}
           </span>
         </button>
       );
@@ -106,7 +105,7 @@ export function WalletModal() {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
-          <Dialog.Title className="font-sans text-lg font-bold text-gray-900 mb-4">
+          <Dialog.Title className=" text-lg font-bold text-gray-900 mb-4">
             Connect Wallet
           </Dialog.Title>
 
