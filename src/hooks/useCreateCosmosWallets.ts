@@ -1,12 +1,6 @@
 import { useCallback } from "react";
 import { ChainType, MinimalWallet } from "@/types/wallet";
-import {
-  WalletType,
-  getWallet,
-  connect,
-  useDisconnect,
-  useActiveWalletType,
-} from "graz";
+import { WalletType, getWallet, connect, useDisconnect } from "graz";
 import { walletInfo } from "@/const/graz";
 import { getChainInfo } from "@/const/chains";
 

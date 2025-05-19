@@ -9,7 +9,6 @@ export function WalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
-  console.log("wallets", wallets);
 
   const { cosmosAccounts, evmAccount, checkIsConnected } = useAccounts();
 
