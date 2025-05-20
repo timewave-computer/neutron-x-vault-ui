@@ -5,22 +5,31 @@ interface TimelineAnimationProps {
   steps: string[];
   durationPerStep?: number;
   lineAnimationDuration?: number;
+  currentStep?: number;
+  onStepChange?: (stepIndex: number) => void;
+  autoAnimate?: boolean;
 }
 
 export const TimelineAnimation = ({
   steps,
   durationPerStep = 2500,
   lineAnimationDuration = 800,
+  currentStep: controlledStep,
+  onStepChange,
+  autoAnimate = true,
 }: TimelineAnimationProps) => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [internalStepIndex, setInternalStepIndex] = useState(0);
   const [animatingLineIndex, setAnimatingLineIndex] = useState<number | null>(
     null,
   );
 
+  // Use controlled or uncontrolled step index
+  const currentStepIndex = controlledStep ?? internalStepIndex;
   const isLastStep = currentStepIndex === steps.length - 1;
 
   useEffect(() => {
-    if (steps.length <= 1) return;
+    // Don't run interval if steps are controlled or if there's only one step
+    if (steps.length <= 1 || controlledStep !== undefined) return;
 
     let intervalId: NodeJS.Timeout;
 
@@ -34,7 +43,11 @@ export const TimelineAnimation = ({
 
         // Only proceed if we haven't reached the end
         if (nextIndex < steps.length) {
-          setCurrentStepIndex(nextIndex);
+          if (onStepChange) {
+            onStepChange(nextIndex);
+          } else {
+            setInternalStepIndex(nextIndex);
+          }
           setAnimatingLineIndex(null);
 
           // If this is the last step, clear the interval
@@ -48,7 +61,14 @@ export const TimelineAnimation = ({
     intervalId = setInterval(progressAnimation, durationPerStep);
 
     return () => clearInterval(intervalId);
-  }, [steps, durationPerStep, currentStepIndex, lineAnimationDuration]);
+  }, [
+    steps,
+    durationPerStep,
+    currentStepIndex,
+    lineAnimationDuration,
+    onStepChange,
+    controlledStep,
+  ]);
 
   return (
     <div className="w-full">

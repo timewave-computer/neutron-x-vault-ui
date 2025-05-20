@@ -76,7 +76,8 @@ export const VaultDeposit = ({
     !depositInput ||
     isDepositing ||
     !userTokenBalance ||
-    parseFloat(depositInput) > parseFloat(userTokenBalance);
+    parseFloat(depositInput) > parseFloat(userTokenBalance) ||
+    parseFloat(depositInput) <= 0;
 
   return (
     <Card variant="primary">

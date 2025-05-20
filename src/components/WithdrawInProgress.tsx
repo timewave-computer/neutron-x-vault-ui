@@ -1,7 +1,9 @@
 import React from "react";
-import { Button, Card, Tooltip, WithdrawTimer } from "@/components";
+import { Card, TimelineAnimation } from "@/components";
 import { useAccount } from "wagmi";
-import { unixTimestampToDateString } from "@/lib/helper/time-format";
+import { WithdrawRequest } from "@/hooks";
+import { useStargateClient } from "graz";
+import { useQuery } from "@tanstack/react-query";
 
 interface WithdrawInProgressProps {
   copy: {
@@ -9,37 +11,49 @@ interface WithdrawInProgressProps {
     description: string;
     cta: string;
   };
-  claimableAtTimestamp?: number;
-  timeRemaining?: string | null;
-  withdrawSharesAmount?: string;
-  withdrawAssetAmount?: string;
-  withdrawRate?: string;
-  isClaimable?: boolean;
-  hasActiveWithdraw?: boolean;
-  onCompleteWithdraw: () => void;
-  isCompletingWithdraw: boolean;
+  withdrawRequest?: WithdrawRequest;
 }
+
+const NTRN_DECIMALS = 6;
 
 export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
   copy,
-  claimableAtTimestamp,
-  timeRemaining,
-  withdrawSharesAmount,
-  withdrawAssetAmount,
-  withdrawRate,
-  isClaimable,
-  hasActiveWithdraw,
-  onCompleteWithdraw,
-  isCompletingWithdraw,
+  withdrawRequest,
 }) => {
-  const { isConnected } = useAccount();
-  if (!hasActiveWithdraw) {
+  const { data: neutronClient } = useStargateClient({
+    chainId: "neutron-1",
+  });
+
+  console.log("cosmosClients", neutronClient);
+
+  const { data: neutronAccountBalance } = useQuery({
+    queryKey: [
+      "neutronAccountBalance",
+      withdrawRequest?.neutronRecieverAddress,
+    ],
+    enabled: !!neutronClient && !!withdrawRequest?.neutronRecieverAddress,
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const balance = await neutronClient?.getBalance(
+        withdrawRequest?.neutronRecieverAddress ?? "",
+        "untrn",
+      );
+      return microToBase(balance?.amount ?? 0, NTRN_DECIMALS);
+    },
+  });
+
+  console.log("neutronAccountBalance", neutronAccountBalance);
+
+  if (!withdrawRequest) {
     return null;
   }
 
-  const claimableAtTimestampFormatted = claimableAtTimestamp
-    ? unixTimestampToDateString(claimableAtTimestamp, "toLocaleString")
-    : "N/A";
+  const {
+    withdrawAssetAmount,
+    withdrawSharesAmount,
+    redemptionRate,
+    convertedWithdrawAssetAmount,
+  } = withdrawRequest;
 
   return (
     <div className="mt-8">
@@ -55,82 +69,28 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
             <div>
               <div className="space-y-1">
                 <p>{copy.description}</p>
-                <div className="flex items-center gap-1">
-                  Why do I have to wait?
-                  <Tooltip
-                    content={
-                      <div>
-                        <p className="font-medium mb-1">
-                          Two-Step Withdrawal Process
-                        </p>
-                        <p className="mb-2">
-                          This is a cross-chain vault, which means your assets
-                          need to be moved back to the source chain before they
-                          can be withdrawn.
-                        </p>
-                        <p className="font-medium mb-1">
-                          Step 1: Clearing Period
-                        </p>
-                        <p className="mb-2">
-                          When you initiate a withdrawal, your funds enter a
-                          clearing period where they are moved from the
-                          destination chain back to the source chain. This
-                          process takes time to complete safely.
-                        </p>
-                        <p className="font-medium mb-1">
-                          Step 2: Final Withdrawal
-                        </p>
-                        <p>
-                          Once your funds have returned to the source chain,
-                          they become claimable. At this point, you must
-                          manually complete the withdrawal by clicking "Transfer
-                          to Wallet".
-                        </p>
-                      </div>
-                    }
-                  />
-                </div>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* col 1 */}
-              <div className="">
-                <WithdrawTimer
-                  initialTimeRemaining={
-                    isClaimable ? "00:00:00" : timeRemaining || "00:00:00"
-                  }
-                  isClaimable={!!isClaimable}
-                  claimTime={claimableAtTimestampFormatted || "N/A"}
-                >
-                  Claimable after: {claimableAtTimestampFormatted}
-                </WithdrawTimer>
+              <div className="flex flex-col w-full items-center">
+                <TimelineAnimation
+                  currentStep={0}
+                  steps={[`Astroport Supervault`, `Neutron Account`]}
+                ></TimelineAnimation>
               </div>
 
               {/* col 2 */}
               <div>
                 <div className="flex flex-col w-full items-center">
                   <span className="text-2xl font-beast text-accent-purple">
-                    {withdrawAssetAmount}
+                    {convertedWithdrawAssetAmount}
                   </span>
-                  <span className="text-sm text-accent-purple">
-                    {withdrawSharesAmount}{" "}
-                    {withdrawRate && Number(withdrawRate) > 0 && (
-                      <>at {withdrawRate}% </>
-                    )}
+                  <span className="text-2xl font-beast text-accent-purple">
+                    {neutronAccountBalance} NTRN
                   </span>
                 </div>
-                <Button
-                  className="w-full mt-2"
-                  onClick={onCompleteWithdraw}
-                  disabled={
-                    !isConnected || isCompletingWithdraw || !isClaimable
-                  }
-                  variant="primary"
-                  isLoading={isCompletingWithdraw}
-                >
-                  {isCompletingWithdraw ? "Processing..." : copy.cta}
-                </Button>
               </div>
             </div>
           </div>
@@ -138,4 +98,16 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
       </Card>
     </div>
   );
+};
+
+// convert micro denom to denom
+export const microToBase = (
+  amount: number | string,
+  decimals: number,
+): number => {
+  if (typeof amount === "string") {
+    amount = Number(amount);
+  }
+  amount = amount / Math.pow(10, decimals);
+  return isNaN(amount) ? 0 : amount;
 };

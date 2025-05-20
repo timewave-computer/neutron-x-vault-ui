@@ -1,5 +1,5 @@
+"use client";
 import {
-  useReadContract,
   useAccount,
   usePublicClient,
   useConfig,
@@ -8,9 +8,10 @@ import {
 import { parseUnits, erc20Abi, BaseError } from "viem";
 import { type Address } from "viem";
 import { valenceVaultABI } from "@/const";
-import { formatBigInt, parseWithdrawRequest } from "@/lib";
+import { formatBigInt } from "@/lib";
 import { readContract } from "@wagmi/core";
 import { useConvertToAssets, useWalletClient } from "@/hooks";
+import { useState } from "react";
 const REFRESH_INTERVAL = 5000;
 
 /**
@@ -31,6 +32,15 @@ interface UseVaultContractProps {
     transactionConfirmationTimeout: number;
     token: string;
   };
+}
+
+// temporary
+export interface WithdrawRequest {
+  withdrawSharesAmount: string;
+  evmAddress: Address;
+  neutronRecieverAddress: string;
+  withdrawId: number;
+  redemptionRate: bigint;
 }
 
 export function useVaultContract(
@@ -56,7 +66,10 @@ export function useVaultContract(
   const publicClient = usePublicClient();
   const { evm: walletClient } = useWalletClient();
   const config = useConfig();
-  const now = new Date().getTime();
+  // temporary state to mock withdraw in progress
+  const [withdrawRequest, setWithdrawRequest] = useState<
+    WithdrawRequest | undefined
+  >(undefined);
 
   const vaultMetadataQuery = useReadContracts({
     query: {
@@ -108,28 +121,11 @@ export function useVaultContract(
         address: vaultProxyAddress as Address,
         args: [address as Address],
       },
-      {
-        // requested a withdrawal
-        abi: valenceVaultABI,
-        functionName: "hasActiveWithdraw",
-        address: vaultProxyAddress as Address,
-        args: [address as Address],
-      }, // withdrawal request if exists
-      {
-        abi: valenceVaultABI,
-        functionName: "userWithdrawRequest",
-        address: vaultProxyAddress as Address,
-        args: [address as Address],
-      },
     ],
   });
 
   const shareBalance = userDataQuery.data?.[1]?.result;
   const maxRedeemableShares = userDataQuery.data?.[2]?.result;
-  const hasActiveWithdraw = userDataQuery.data?.[3]?.result;
-  const _userWithdrawRequest = userDataQuery.data?.[4]?.result;
-
-  const userWithdrawRequest = parseWithdrawRequest(_userWithdrawRequest);
 
   // Convert user's share balance to assets
   const convertShareBalanceQuery = useConvertToAssets({
@@ -144,34 +140,14 @@ export function useVaultContract(
   // Convert withdraw shares to assets
   const convertWithdrawSharesQuery = useConvertToAssets({
     vaultProxyAddress: vaultProxyAddress as Address,
-    shares: userWithdrawRequest?.withdrawSharesAmount,
+    shares: parseUnits(
+      withdrawRequest?.withdrawSharesAmount ?? "0",
+      Number(shareDecimals),
+    ),
     refetchInterval: REFRESH_INTERVAL,
-    enabled:
-      isConnected && !!address && !!userWithdrawRequest?.withdrawSharesAmount,
+    enabled: isConnected && !!address && !!withdrawRequest,
   });
   const convertedWithdrawAssetAmount = convertWithdrawSharesQuery.data;
-
-  // Query the strategist update info for the withdrawal request
-  const strategistUpdateInfoQuery = useReadContract({
-    query: {
-      enabled: isConnected && !!address && !!userWithdrawRequest?.updateId,
-      refetchInterval: REFRESH_INTERVAL,
-    },
-    abi: valenceVaultABI,
-    functionName: "updateInfos",
-    address: vaultProxyAddress as Address,
-    args: [BigInt(userWithdrawRequest?.updateId ?? 0)],
-  });
-  const withdrawRate = strategistUpdateInfoQuery.data?.[0];
-  const strategistUpdateTimestamp = strategistUpdateInfoQuery.data?.[1];
-  const withdrawFee = strategistUpdateInfoQuery.data?.[2];
-
-  const isWithdrawClaimable =
-    withdrawRate &&
-    userWithdrawRequest?.claimableAtTimestamp &&
-    strategistUpdateTimestamp
-      ? now > userWithdrawRequest.claimableAtTimestamp
-      : false;
 
   /**
    *  Vault queries
@@ -294,6 +270,15 @@ export function useVaultContract(
     // TODO: include neutronRecieverAddress in the withdraw request
 
     try {
+      setWithdrawRequest({
+        withdrawSharesAmount: shares,
+        evmAddress: address,
+        neutronRecieverAddress,
+        redemptionRate: redemptionRate ?? BigInt(0),
+        withdrawId: 0,
+      });
+      return "0xplaceholder";
+
       const parsedShares = parseUnits(shares, Number(shareDecimals));
 
       // approve the vault to spend vault shares (shares owned by user)
@@ -349,101 +334,26 @@ export function useVaultContract(
     }
   };
 
-  // Complete a withdrawal. Can be executed after the lockup period has passed.
-  const completeWithdraw = async () => {
-    if (!vaultMetadata) throw new Error("Failed to complete withdrawal");
-    if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
-    if (!publicClient) throw new Error("Public client not initialized");
-
-    try {
-      const { request } = await publicClient.simulateContract({
-        address: vaultProxyAddress as Address,
-        abi: valenceVaultABI,
-        functionName: "completeWithdraw",
-        args: [address],
-        account: address,
-      });
-
-      // Execute the transaction
-      const completeHash = await walletClient.writeContract(request);
-      // Wait for transaction to be mined
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: completeHash,
-        timeout: transactionConfirmationTimeout,
-      });
-
-      if (receipt.status !== "success") {
-        console.error("Transaction receipt:", receipt);
-        throw new Error(`Transaction receipt status: ${receipt.status}`);
-      }
-      return completeHash;
-    } catch (error) {
-      handleAndThrowError(error, "Complete Withdraw failed");
-    }
-  };
-
   // Refetch all data. Nice utility to use after performing an action
   const refetch = () => {
     vaultMetadataQuery.refetch();
     userDataQuery.refetch();
     convertWithdrawSharesQuery.refetch();
     convertShareBalanceQuery.refetch();
-    strategistUpdateInfoQuery.refetch();
   };
 
   // statuses
-
   const isLoading =
     vaultMetadataQuery.isLoading ||
     userDataQuery.isLoading ||
     convertWithdrawSharesQuery.isLoading ||
-    convertShareBalanceQuery.isLoading ||
-    strategistUpdateInfoQuery.isLoading;
+    convertShareBalanceQuery.isLoading;
 
   const isError =
     vaultMetadataQuery.isError ||
     userDataQuery.isError ||
     convertWithdrawSharesQuery.isError ||
-    convertShareBalanceQuery.isError ||
-    strategistUpdateInfoQuery.isError;
-
-  // for better UX, include assets in withdraw as part of the balance
-  const syntheticShareBalance =
-    (shareBalance ?? BigInt(0)) +
-    (userWithdrawRequest?.withdrawSharesAmount ?? BigInt(0));
-  const syntheticAssetBalance =
-    (userAssetAmount ?? BigInt(0)) +
-    (convertedWithdrawAssetAmount ?? BigInt(0));
-
-  const pendingWithdraw = userWithdrawRequest
-    ? {
-        withdrawSharesAmount: formatBigInt(
-          userWithdrawRequest.withdrawSharesAmount,
-          shareDecimals,
-        ),
-        withdrawAssetAmount: formatBigInt(
-          convertedWithdrawAssetAmount,
-          tokenDecimals,
-        ),
-
-        // withdraw info
-        owner: userWithdrawRequest.owner,
-        timeRemaining: userWithdrawRequest.timeRemaining,
-        maxLossBps: userWithdrawRequest.maxLossBps,
-        receiver: userWithdrawRequest.receiver,
-        updateId: userWithdrawRequest.updateId,
-
-        solverFee: formatBigInt(userWithdrawRequest.solverFee, shareDecimals),
-
-        claimableAtTimestamp: userWithdrawRequest.claimableAtTimestamp,
-        // update info
-        withdrawFee: withdrawFee,
-        withdrawRate: formatBigInt(withdrawRate, shareDecimals),
-        hasActiveWithdraw: hasActiveWithdraw ?? false,
-        isClaimable: isWithdrawClaimable,
-      }
-    : undefined;
+    convertShareBalanceQuery.isError;
 
   return {
     isLoading,
@@ -451,7 +361,6 @@ export function useVaultContract(
     refetch,
     depositWithAmount,
     withdrawShares,
-    completeWithdraw,
     previewDeposit,
     previewRedeem,
     tokenDecimals,
@@ -460,9 +369,17 @@ export function useVaultContract(
       tvl: formatBigInt(tvl, tokenDecimals),
       redemptionRate: formatBigInt(redemptionRate, shareDecimals),
       maxRedeemableShares: formatBigInt(maxRedeemableShares, shareDecimals),
-      shareBalance: formatBigInt(syntheticShareBalance, shareDecimals),
-      assetBalance: formatBigInt(syntheticAssetBalance, tokenDecimals),
-      pendingWithdraw,
+      shareBalance: formatBigInt(shareBalance ?? BigInt(0), shareDecimals),
+      assetBalance: formatBigInt(userAssetAmount ?? BigInt(0), tokenDecimals),
+      withdrawRequest: withdrawRequest
+        ? {
+            ...withdrawRequest,
+            convertedWithdrawAssetAmount: formatBigInt(
+              convertedWithdrawAssetAmount ?? BigInt(0),
+              tokenDecimals,
+            ),
+          }
+        : undefined,
     },
   };
 }
@@ -483,7 +400,6 @@ interface UseVaultContractReturnValue {
     allowSolverCompletion?: boolean;
     neutronRecieverAddress: string;
   }) => Promise<`0x${string}` | undefined>;
-  completeWithdraw: () => Promise<`0x${string}` | undefined>;
   previewDeposit: (amount: string) => Promise<string>;
   previewRedeem: (shares: string) => Promise<string>;
   tokenDecimals: number;
@@ -494,20 +410,8 @@ interface UseVaultContractReturnValue {
     maxRedeemableShares?: string;
     shareBalance: string;
     assetBalance: string;
-    pendingWithdraw?: {
-      hasActiveWithdraw: boolean;
-      withdrawFee?: number;
-      withdrawRate?: string;
-      withdrawAssetAmount: string;
-      isClaimable?: boolean;
-      owner?: Address;
-      timeRemaining?: string | null;
-      maxLossBps?: number;
-      receiver?: Address;
-      updateId?: number;
-      solverFee?: string;
-      withdrawSharesAmount?: string;
-      claimableAtTimestamp?: number | null;
+    withdrawRequest?: WithdrawRequest & {
+      convertedWithdrawAssetAmount: string;
     };
   };
 }

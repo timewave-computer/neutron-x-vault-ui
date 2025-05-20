@@ -97,7 +97,8 @@ export const VaultWithdraw = ({
     isWithdrawing ||
     !maxRedeemableShares ||
     maxRedeemableShares === "0" ||
-    parseFloat(withdrawInput) > parseFloat(maxRedeemableShares);
+    parseFloat(withdrawInput) > parseFloat(maxRedeemableShares) ||
+    parseFloat(withdrawInput) <= 0;
 
   return (
     <Card variant="primary">

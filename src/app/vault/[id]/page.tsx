@@ -7,7 +7,6 @@ import {
   useTokenBalances,
   useAccounts,
 } from "@/hooks";
-import {} from "react";
 import { formatNumberString } from "@/lib";
 import { useToast } from "@/context";
 import { useMutation } from "@tanstack/react-query";
@@ -39,7 +38,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     depositWithAmount,
     withdrawShares,
     refetch: refetchVaultContract,
-    completeWithdraw,
+
     previewRedeem,
     previewDeposit,
     data: {
@@ -47,7 +46,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
       maxRedeemableShares,
       shareBalance: userShares,
       assetBalance: userVaultAssets,
-      pendingWithdraw,
+      withdrawRequest,
     },
     isLoading: isLoadingContract,
     isError: isContractError,
@@ -64,40 +63,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
         }
       : undefined,
   });
-
-  const { mutate: handleCompleteWithdraw, isPending: isCompletingWithdraw } =
-    useMutation({
-      mutationFn: async () => {
-        if (!isConnected || !vaultData)
-          throw new Error("Unable to complete withdrawal");
-        return completeWithdraw();
-      },
-      onSuccess: (hash) => {
-        showToast({
-          title: "Withdraw successful",
-          description: "Your withdraw has been completed successfully.",
-          type: "success",
-          txHash: hash,
-        });
-        ethBalance.refetch();
-        refetchVaultContract();
-      },
-      onError: (err) => {
-        if (err instanceof Error) {
-          showToast({
-            title: "Transaction failed",
-            description: err.message,
-            type: "error",
-          });
-        } else {
-          console.error("Failed to complete withdrawal", err);
-          showToast({
-            title: "Failed to complete withdrawal",
-            type: "error",
-          });
-        }
-      },
-    });
 
   const userSharesFormatted = formatNumberString(userShares, "shares", {
     displayDecimals: 2,
@@ -206,28 +171,17 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           maxRedeemableShares &&
           parseFloat(maxRedeemableShares) > 0 &&
           // contains copy for vault path and on deposit success
-          !pendingWithdraw?.hasActiveWithdraw && (
+          !withdrawRequest && (
             <DepositInProgress copy={vaultData.copy.depositInProgress} />
           )}
 
         {/*shows when user has a pending withdrawal */}
-        {isConnected &&
-          pendingWithdraw &&
-          pendingWithdraw?.hasActiveWithdraw && (
-            <WithdrawInProgress
-              hasActiveWithdraw={pendingWithdraw.hasActiveWithdraw}
-              isClaimable={pendingWithdraw.isClaimable}
-              withdrawAssetAmount={`${pendingWithdraw.withdrawAssetAmount} ${tokenSymbol}`}
-              withdrawSharesAmount={`${pendingWithdraw.withdrawSharesAmount} shares`}
-              copy={vaultData?.copy.withdrawInProgress}
-              claimableAtTimestamp={
-                pendingWithdraw.claimableAtTimestamp ?? undefined
-              }
-              timeRemaining={pendingWithdraw.timeRemaining}
-              onCompleteWithdraw={handleCompleteWithdraw}
-              isCompletingWithdraw={isCompletingWithdraw}
-            />
-          )}
+        {isConnected && withdrawRequest && (
+          <WithdrawInProgress
+            withdrawRequest={withdrawRequest}
+            copy={vaultData?.copy.withdrawInProgress}
+          />
+        )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VaultDeposit
             vaultData={vaultData}
