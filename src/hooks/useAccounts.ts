@@ -34,6 +34,8 @@ export const useAccounts = () => {
     cosmosAccounts,
     evmAccount,
     checkIsConnected,
+    isEvmConnected: checkIsConnected(ChainType.Evm),
+    isCosmosConnected: checkIsConnected(ChainType.Cosmos),
     isConnected:
       checkIsConnected(ChainType.Evm) || checkIsConnected(ChainType.Cosmos),
   };
