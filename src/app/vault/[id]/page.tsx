@@ -7,27 +7,17 @@ import {
   useTokenBalances,
   useAccounts,
 } from "@/hooks";
-import { useState } from "react";
-import { formatNumberString, isValidNumberInput } from "@/lib";
+import {} from "react";
+import { formatNumberString } from "@/lib";
 import { useToast } from "@/context";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/const";
-import {
-  Button,
-  Input,
-  Card,
-  WithdrawInProgress,
-  DepositInProgress,
-} from "@/components";
+import { useMutation } from "@tanstack/react-query";
+import { Card, WithdrawInProgress, DepositInProgress } from "@/components";
 import { VaultDeposit } from "@/components/VaultDeposit";
 import { VaultWithdraw } from "@/components/VaultWithdraw";
 
 export default function VaultPage({ params }: { params: { id: string } }) {
-  const { isConnected, evmAccount, isCosmosConnected, cosmosAccounts } =
-    useAccounts();
+  const { isConnected, evmAccount } = useAccounts();
   const { showToast } = useToast();
-  const [depositInput, setDepositInput] = useState("");
-  const [withdrawInput, setWithdrawInput] = useState("");
   const evmAddress = evmAccount?.address;
   const {
     vaults,
@@ -36,9 +26,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   } = useViewAllVaults();
   const vaultData = vaults?.find((v) => v.vaultId === params.id);
   const tokenSymbol = vaultData?.token ?? "";
-  const cosmosAddress = cosmosAccounts?.find(
-    (account) => account.chainId === "neutron-1",
-  )?.address;
 
   const { ethBalance, tokenBalances } = useTokenBalances({
     address: evmAddress,
@@ -76,109 +63,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
             vaultData.transactionConfirmationTimeout,
         }
       : undefined,
-  });
-
-  const { data: previewDepositAmount } = useQuery({
-    enabled:
-      !!vaultData?.vaultProxyAddress &&
-      parseFloat(depositInput) > 0 &&
-      isConnected,
-    staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_DEPOSIT,
-      vaultData?.vaultProxyAddress,
-      depositInput,
-    ],
-    queryFn: () => {
-      return previewDeposit(depositInput);
-    },
-  });
-
-  const { data: previewRedeemAmount } = useQuery({
-    enabled:
-      !!vaultData?.vaultProxyAddress &&
-      parseFloat(withdrawInput) > 0 &&
-      isConnected,
-    staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_WITHDRAW,
-      vaultData?.vaultProxyAddress,
-      withdrawInput,
-    ],
-    queryFn: () => {
-      return previewRedeem(withdrawInput);
-    },
-  });
-
-  const { mutate: handleDeposit, isPending: isDepositing } = useMutation({
-    mutationFn: async () => {
-      if (!depositInput || !isConnected || !vaultData)
-        throw new Error("Unable to initiate deposit");
-      return depositWithAmount(depositInput);
-    },
-    onSuccess: (hash) => {
-      setDepositInput("");
-      const toastDescription = vaultData?.aprPercentage
-        ? `Your funds are now earning ${vaultData?.aprPercentage}% APY!`
-        : "Funds are now earning yield.";
-      showToast({
-        title: "Deposit successful",
-        description: toastDescription,
-        type: "success",
-        txHash: hash,
-      });
-      refetchVaultContract();
-      ethBalance.refetch();
-    },
-    onError: (err) => {
-      if (err instanceof Error) {
-        showToast({
-          title: "Transaction failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        console.error("Failed to deposit", err);
-        showToast({
-          title: "Failed to deposit",
-          type: "error",
-        });
-      }
-    },
-  });
-
-  const { mutate: handleWithdraw, isPending: isWithdrawing } = useMutation({
-    mutationFn: async () => {
-      if (!withdrawInput || !isConnected || !vaultData)
-        throw new Error("Unable to initiate withdrawal");
-      return withdrawShares(withdrawInput);
-    },
-    onSuccess: (hash) => {
-      setWithdrawInput("");
-      showToast({
-        title: "Withdraw initiation submitted",
-        description: "Assets will be claimable after the unbonding period.",
-        type: "success",
-        txHash: hash,
-      });
-      ethBalance.refetch();
-      refetchVaultContract();
-    },
-    onError: (err) => {
-      if (err instanceof Error) {
-        showToast({
-          title: "Transaction failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        console.error("Failed to withdraw", err);
-        showToast({
-          title: "Failed to withdraw",
-          type: "error",
-        });
-      }
-    },
   });
 
   const { mutate: handleCompleteWithdraw, isPending: isCompletingWithdraw } =
@@ -230,22 +114,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   const vaultTvlFormatted = formatNumberString(tvl, tokenSymbol, {
     displayDecimals: 2,
   });
-
-  const isWithdrawDisabled =
-    !isConnected ||
-    !isCosmosConnected ||
-    !withdrawInput ||
-    isWithdrawing ||
-    !maxRedeemableShares ||
-    maxRedeemableShares === "0" ||
-    parseFloat(withdrawInput) > parseFloat(maxRedeemableShares);
-
-  const isDepositDisabled =
-    !isConnected ||
-    !depositInput ||
-    isDepositing ||
-    !userTokenBalance ||
-    parseFloat(depositInput) > parseFloat(userTokenBalance);
 
   const isLoading = isLoadingVaults || isLoadingContract;
   const isError = isVaultsError || isContractError;
@@ -392,8 +260,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           <VaultWithdraw
             vaultData={vaultData}
             maxRedeemableShares={maxRedeemableShares}
-            isConnected={isConnected}
-            isCosmosConnected={isCosmosConnected}
             previewRedeem={previewRedeem}
             withdrawShares={withdrawShares}
             onWithdrawSuccess={(hash: `0x${string}`) => {
@@ -420,21 +286,3 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-/***
- * Reusable function to validate number input
- * @param value - The value to handle
- * @param setValue - The function to set the value
- */
-const handleNumberInput = (
-  value: string,
-  setValue: (value: string) => void,
-) => {
-  if (value === "") {
-    setValue("");
-  }
-  // Only allow positive numbers
-  if (isValidNumberInput(value) && parseFloat(value) >= 0) {
-    setValue(value);
-  }
-};

@@ -272,11 +272,17 @@ export function useVaultContract(
   };
 
   // Withdraw shares from vault. Withdraw will be "pending" until the user completes the withdrawal.
-  const withdrawShares = async (
-    shares: string,
-    maxLossBps: number = 1000,
-    allowSolverCompletion: boolean = false,
-  ) => {
+  const withdrawShares = async ({
+    shares,
+    maxLossBps = 1000,
+    allowSolverCompletion = false,
+    neutronRecieverAddress,
+  }: {
+    shares: string;
+    maxLossBps?: number;
+    allowSolverCompletion?: boolean;
+    neutronRecieverAddress: string;
+  }) => {
     if (!vaultMetadata) throw new Error("Failed to initiate withdraw");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
@@ -284,6 +290,8 @@ export function useVaultContract(
 
     // Validate share balance
     if (!shareBalance) throw new Error("No shares to withdraw");
+
+    // TODO: include neutronRecieverAddress in the withdraw request
 
     try {
       const parsedShares = parseUnits(shares, Number(shareDecimals));
@@ -464,11 +472,17 @@ interface UseVaultContractReturnValue {
   isError: boolean;
   refetch: () => void;
   depositWithAmount: (amount: string) => Promise<`0x${string}` | undefined>;
-  withdrawShares: (
-    shares: string,
-    maxLossBps?: number,
-    allowSolverCompletion?: boolean,
-  ) => Promise<`0x${string}` | undefined>;
+  withdrawShares: ({
+    shares,
+    maxLossBps,
+    allowSolverCompletion,
+    neutronRecieverAddress,
+  }: {
+    shares: string;
+    maxLossBps?: number;
+    allowSolverCompletion?: boolean;
+    neutronRecieverAddress: string;
+  }) => Promise<`0x${string}` | undefined>;
   completeWithdraw: () => Promise<`0x${string}` | undefined>;
   previewDeposit: (amount: string) => Promise<string>;
   previewRedeem: (shares: string) => Promise<string>;

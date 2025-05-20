@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Input, Card } from "@/components";
-import { formatNumberString, isValidNumberInput } from "@/lib";
+import { handleNumberInput, isValidNumberInput } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
 
@@ -118,12 +118,7 @@ export const VaultDeposit = ({
           value={depositInput}
           onChange={(e) => {
             const value = e.target.value;
-            if (value === "") {
-              setDepositInput("");
-            }
-            if (isValidNumberInput(value) && parseFloat(value) >= 0) {
-              setDepositInput(value);
-            }
+            handleNumberInput(value, setDepositInput);
           }}
           isEnabled={isConnected && !isDepositing}
           isError={

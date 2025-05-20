@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button, Input, Card } from "@/components";
-import { isValidNumberInput } from "@/lib";
+import { handleNumberInput, shortenAddress } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
+import { useAccounts } from "@/hooks";
+import { useWalletModal } from "@/context";
 
 interface VaultWithdrawProps {
   vaultData: {
@@ -17,14 +19,18 @@ interface VaultWithdrawProps {
     };
   };
   maxRedeemableShares: string | undefined;
-  isConnected: boolean;
-  isCosmosConnected: boolean;
   previewRedeem: (amount: string) => Promise<string>;
-  withdrawShares: (
-    shares: string,
-    maxLossBps?: number,
-    allowSolverCompletion?: boolean,
-  ) => Promise<`0x${string}` | undefined>;
+  withdrawShares: ({
+    shares,
+    maxLossBps,
+    allowSolverCompletion,
+    neutronRecieverAddress,
+  }: {
+    shares: string;
+    maxLossBps?: number;
+    allowSolverCompletion?: boolean;
+    neutronRecieverAddress: string;
+  }) => Promise<`0x${string}` | undefined>;
   onWithdrawSuccess: (hash: `0x${string}`) => void;
   onWithdrawError: (error: Error) => void;
 }
@@ -32,14 +38,20 @@ interface VaultWithdrawProps {
 export const VaultWithdraw = ({
   vaultData,
   maxRedeemableShares,
-  isConnected,
-  isCosmosConnected,
   previewRedeem,
   withdrawShares,
   onWithdrawSuccess,
   onWithdrawError,
 }: VaultWithdrawProps) => {
   const [withdrawInput, setWithdrawInput] = useState("");
+  const { openModal } = useWalletModal();
+
+  const { isConnected, isCosmosConnected, isEvmConnected, cosmosAccounts } =
+    useAccounts();
+
+  const cosmosAddress = cosmosAccounts?.find(
+    (account) => account.chainId === "neutron-1",
+  )?.address;
 
   const { data: previewRedeemAmount } = useQuery({
     enabled:
@@ -58,10 +70,13 @@ export const VaultWithdraw = ({
   });
 
   const { mutate: handleWithdraw, isPending: isWithdrawing } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (neutronRecieverAddress: string) => {
       if (!withdrawInput || !isConnected || !vaultData)
         throw new Error("Unable to initiate withdrawal");
-      const result = await withdrawShares(withdrawInput);
+      const result = await withdrawShares({
+        shares: withdrawInput,
+        neutronRecieverAddress,
+      });
       if (!result) throw new Error("Transaction failed");
       return result;
     },
@@ -76,9 +91,8 @@ export const VaultWithdraw = ({
     },
   });
 
-  const isWithdrawDisabled =
-    !isConnected ||
-    !isCosmosConnected ||
+  const isDisabled =
+    !isEvmConnected ||
     !withdrawInput ||
     isWithdrawing ||
     !maxRedeemableShares ||
@@ -125,34 +139,49 @@ export const VaultWithdraw = ({
           placeholder="0.0"
           onChange={(e) => {
             const value = e.target.value;
-            if (value === "") {
-              setWithdrawInput("");
-            }
-            if (isValidNumberInput(value) && parseFloat(value) >= 0) {
-              setWithdrawInput(value);
-            }
+            handleNumberInput(value, setWithdrawInput);
           }}
-          isEnabled={isConnected && !isWithdrawing}
+          isEnabled={isEvmConnected && !isWithdrawing}
           isError={
             parseFloat(withdrawInput) > parseFloat(maxRedeemableShares ?? "0")
           }
         />
-
         <div className="flex items-center bg-primary-light px-4 text-base text-black border-l-2 border-primary/40 rounded-r-lg">
           Shares
         </div>
       </div>
 
-      <Button
-        className="mt-4"
-        onClick={() => handleWithdraw()}
-        disabled={isWithdrawDisabled}
-        variant="primary"
-        fullWidth
-        isLoading={isWithdrawing}
-      >
-        {isWithdrawing ? "Confirm in Wallet..." : vaultData.copy.withdraw.cta}
-      </Button>
+      {!isEvmConnected ? (
+        <Button className="mt-4" disabled={true} variant="primary" fullWidth>
+          {vaultData.copy.withdraw.cta}
+        </Button>
+      ) : (
+        <>
+          {!isCosmosConnected || !cosmosAddress ? (
+            <Button
+              disabled={isDisabled}
+              onClick={openModal}
+              className="mt-4"
+              fullWidth
+            >
+              Connect to Neutron
+            </Button>
+          ) : (
+            <Button
+              className="mt-4"
+              onClick={() => handleWithdraw(cosmosAddress)}
+              disabled={isDisabled}
+              variant="primary"
+              fullWidth
+              isLoading={isWithdrawing}
+            >
+              {isWithdrawing
+                ? "Confirm in Wallet..."
+                : vaultData.copy.withdraw.cta}
+            </Button>
+          )}
+        </>
+      )}
 
       {/* Withdraw estimate and warning display */}
       <div className="h-6 mt-4 flex justify-between items-center">
@@ -160,7 +189,8 @@ export const VaultWithdraw = ({
           parseFloat(withdrawInput) > 0 &&
           previewRedeemAmount && (
             <p className="text-sm text-gray-500">
-              ≈ {previewRedeemAmount} {vaultData.token}
+              ≈ {previewRedeemAmount} {vaultData.token}{" "}
+              {cosmosAddress ? "to " + shortenAddress(cosmosAddress) : ""}
             </p>
           )}
         {isConnected &&
