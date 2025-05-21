@@ -218,9 +218,8 @@ export default function VaultPage({ params }: { params: { id: string } }) {
             withdrawShares={withdrawShares}
             onWithdrawSuccess={(hash: `0x${string}`) => {
               showToast({
-                title: "Withdraw initiation submitted",
-                description:
-                  "Assets will be claimable after the unbonding period.",
+                title: "Withdraw submitted",
+                description: "Assets will be sent to your Neutron account.",
                 type: "success",
                 txHash: hash,
               });

@@ -1,9 +1,11 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { Card, TimelineAnimation } from "@/components";
-import { useAccount } from "wagmi";
 import { WithdrawRequest } from "@/hooks";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
+import { shortenAddress } from "@/lib/helper";
+import { QUERY_KEYS } from "@/const";
 
 interface WithdrawInProgressProps {
   copy: {
@@ -20,15 +22,26 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
   copy,
   withdrawRequest,
 }) => {
+  const [currentStep, setCurrentStep] = useState(0);
   const { data: neutronClient } = useStargateClient({
     chainId: "neutron-1",
   });
 
-  console.log("cosmosClients", neutronClient);
+  useEffect(() => {
+    // temporary to simulate the success of the transfer.
+    if (currentStep === 0) {
+      const timer = setInterval(() => {
+        setCurrentStep((prevStep) => (prevStep < 1 ? prevStep + 1 : prevStep));
+      }, 5000);
+
+      return () => clearInterval(timer);
+    }
+  }, [currentStep]);
 
   const { data: neutronAccountBalance } = useQuery({
     queryKey: [
-      "neutronAccountBalance",
+      QUERY_KEYS.NEUTRON_ACCOUNT_BALANCE,
+      withdrawRequest?.evmAddress,
       withdrawRequest?.neutronRecieverAddress,
     ],
     enabled: !!neutronClient && !!withdrawRequest?.neutronRecieverAddress,
@@ -42,18 +55,11 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     },
   });
 
-  console.log("neutronAccountBalance", neutronAccountBalance);
-
   if (!withdrawRequest) {
     return null;
   }
 
-  const {
-    withdrawAssetAmount,
-    withdrawSharesAmount,
-    redemptionRate,
-    convertedWithdrawAssetAmount,
-  } = withdrawRequest;
+  const { convertedAssetAmount, neutronRecieverAddress } = withdrawRequest;
 
   return (
     <div className="mt-8">
@@ -69,14 +75,18 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
             <div>
               <div className="space-y-1">
                 <p>{copy.description}</p>
+                <p>
+                  Withdrawing {convertedAssetAmount} LBTC to{" "}
+                  {shortenAddress(neutronRecieverAddress)}.
+                </p>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* col 1 */}
-              <div className="flex flex-col w-full items-center">
+              <div className="flex flex-col w-full items-center pb-2">
                 <TimelineAnimation
-                  currentStep={0}
+                  currentStep={currentStep}
                   steps={[`Astroport Supervault`, `Neutron Account`]}
                 ></TimelineAnimation>
               </div>
@@ -84,12 +94,21 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
               {/* col 2 */}
               <div>
                 <div className="flex flex-col w-full items-center">
-                  <span className="text-2xl font-beast text-accent-purple">
-                    {convertedWithdrawAssetAmount}
-                  </span>
-                  <span className="text-2xl font-beast text-accent-purple">
-                    {neutronAccountBalance} NTRN
-                  </span>
+                  <div className="text-xs text-gray-500 mb-1">
+                    Real-time Balance
+                  </div>
+                  <div className="text-3xl font-beast text-accent-purple">
+                    {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
+                    LBTC
+                  </div>
+                  <a
+                    href={`https://neutron.celat.one/neutron-1/accounts/${neutronRecieverAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-sm font-light text-gray-400 mb-1"
+                  >
+                    {neutronRecieverAddress}
+                  </a>
                 </div>
               </div>
             </div>

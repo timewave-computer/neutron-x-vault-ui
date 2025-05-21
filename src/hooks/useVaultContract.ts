@@ -36,7 +36,8 @@ interface UseVaultContractProps {
 
 // temporary
 export interface WithdrawRequest {
-  withdrawSharesAmount: string;
+  sharesAmount: string;
+  convertedAssetAmount?: string;
   evmAddress: Address;
   neutronRecieverAddress: string;
   withdrawId: number;
@@ -141,7 +142,7 @@ export function useVaultContract(
   const convertWithdrawSharesQuery = useConvertToAssets({
     vaultProxyAddress: vaultProxyAddress as Address,
     shares: parseUnits(
-      withdrawRequest?.withdrawSharesAmount ?? "0",
+      withdrawRequest?.sharesAmount ?? "0",
       Number(shareDecimals),
     ),
     refetchInterval: REFRESH_INTERVAL,
@@ -271,7 +272,7 @@ export function useVaultContract(
 
     try {
       setWithdrawRequest({
-        withdrawSharesAmount: shares,
+        sharesAmount: shares,
         evmAddress: address,
         neutronRecieverAddress,
         redemptionRate: redemptionRate ?? BigInt(0),
@@ -374,7 +375,7 @@ export function useVaultContract(
       withdrawRequest: withdrawRequest
         ? {
             ...withdrawRequest,
-            convertedWithdrawAssetAmount: formatBigInt(
+            convertedAssetAmount: formatBigInt(
               convertedWithdrawAssetAmount ?? BigInt(0),
               tokenDecimals,
             ),
@@ -411,7 +412,7 @@ interface UseVaultContractReturnValue {
     shareBalance: string;
     assetBalance: string;
     withdrawRequest?: WithdrawRequest & {
-      convertedWithdrawAssetAmount: string;
+      convertedAssetAmount: string;
     };
   };
 }
