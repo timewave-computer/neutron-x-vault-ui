@@ -12,8 +12,6 @@ interface WithdrawInProgressProps {
   withdrawRequest?: WithdrawRequest;
 }
 
-const NTRN_DECIMALS = 6;
-
 export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
   vaultData,
   withdrawRequest,
@@ -51,9 +49,9 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     queryFn: async () => {
       const balance = await neutronClient?.getBalance(
         withdrawRequest?.neutronReceiverAddress ?? "",
-        "untrn",
+        vaultData.cosmos.token.denom,
       );
-      return microToBase(balance?.amount ?? 0, NTRN_DECIMALS);
+      return microToBase(balance?.amount ?? 0, vaultData.cosmos.token.decimals);
     },
   });
 
