@@ -1,14 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Card, TimelineAnimation } from "@/components";
-import { AllVaultData, WithdrawRequest } from "@/hooks";
+import { VaultSummaryData, WithdrawRequest } from "@/hooks";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
-import { shortenAddress } from "@/lib/helper";
+import { shortenAddress, microToBase } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
 
 interface WithdrawInProgressProps {
-  vaultData: AllVaultData;
+  vaultData: VaultSummaryData;
   withdrawRequest?: WithdrawRequest;
 }
 
@@ -44,13 +44,13 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     queryKey: [
       QUERY_KEYS.NEUTRON_ACCOUNT_BALANCE,
       withdrawRequest?.evmAddress,
-      withdrawRequest?.neutronRecieverAddress,
+      withdrawRequest?.neutronReceiverAddress,
     ],
-    enabled: !!neutronClient && !!withdrawRequest?.neutronRecieverAddress,
+    enabled: !!neutronClient && !!withdrawRequest?.neutronReceiverAddress,
     refetchInterval: 5000,
     queryFn: async () => {
       const balance = await neutronClient?.getBalance(
-        withdrawRequest?.neutronRecieverAddress ?? "",
+        withdrawRequest?.neutronReceiverAddress ?? "",
         "untrn",
       );
       return microToBase(balance?.amount ?? 0, NTRN_DECIMALS);
@@ -61,7 +61,7 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     return null;
   }
 
-  const { convertedAssetAmount, neutronRecieverAddress } = withdrawRequest;
+  const { convertedAssetAmount, neutronReceiverAddress } = withdrawRequest;
 
   return (
     <div className="mt-8">
@@ -84,8 +84,9 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                     : copy.withdrawInProgress.description}
                 </p>
                 <p>
-                  Withdrawing {convertedAssetAmount} {vaultData.symbol} to{" "}
-                  {shortenAddress(neutronRecieverAddress)}.
+                  {isCompleted
+                    ? `Withdrawal complete. ${convertedAssetAmount} ${vaultData.symbol} has been transferred to your wallet.`
+                    : `Withdrawing ${convertedAssetAmount} ${vaultData.symbol} to ${shortenAddress(neutronReceiverAddress)}.`}
                 </p>
               </div>
             </div>
@@ -110,12 +111,12 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                     {vaultData.symbol}
                   </div>
                   <a
-                    href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronRecieverAddress}`}
+                    href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronReceiverAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline text-sm font-light text-gray-400 mb-1"
                   >
-                    {neutronRecieverAddress}
+                    {neutronReceiverAddress}
                   </a>
                 </div>
               </div>
@@ -125,16 +126,4 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
       </Card>
     </div>
   );
-};
-
-// convert micro denom to denom
-export const microToBase = (
-  amount: number | string,
-  decimals: number,
-): number => {
-  if (typeof amount === "string") {
-    amount = Number(amount);
-  }
-  amount = amount / Math.pow(10, decimals);
-  return isNaN(amount) ? 0 : amount;
 };

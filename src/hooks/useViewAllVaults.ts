@@ -162,7 +162,7 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
   };
 }
 
-export type AllVaultData = VaultConfig & {
+export type VaultSummaryData = VaultConfig & {
   tokenDecimals: number;
   shareDecimals: number;
   aprPercentage?: string;
@@ -176,6 +176,6 @@ export type AllVaultData = VaultConfig & {
 export type UseViewAllVaultsReturnValue = {
   isLoading: boolean;
   isError: boolean;
-  vaults: Array<AllVaultData>;
+  vaults: Array<VaultSummaryData>;
   chainId?: number;
 };

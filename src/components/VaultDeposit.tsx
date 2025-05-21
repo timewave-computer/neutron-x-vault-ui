@@ -4,10 +4,10 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { AllVaultData } from "@/hooks";
+import { VaultSummaryData } from "@/hooks";
 
 interface VaultDepositProps {
-  vaultData: AllVaultData;
+  vaultData: VaultSummaryData;
   userTokenBalance: string | undefined;
   isConnected: boolean;
   previewDeposit: (amount: string) => Promise<string>;

@@ -39,7 +39,7 @@ export interface WithdrawRequest {
   sharesAmount: string;
   convertedAssetAmount?: string;
   evmAddress: Address;
-  neutronRecieverAddress: string;
+  neutronReceiverAddress: string;
   withdrawId: number;
   redemptionRate: bigint;
 }
@@ -253,12 +253,12 @@ export function useVaultContract(
     shares,
     maxLossBps = 1000,
     allowSolverCompletion = false,
-    neutronRecieverAddress,
+    neutronReceiverAddress,
   }: {
     shares: string;
     maxLossBps?: number;
     allowSolverCompletion?: boolean;
-    neutronRecieverAddress: string;
+    neutronReceiverAddress: string;
   }) => {
     if (!vaultMetadata) throw new Error("Failed to initiate withdraw");
     if (!address) throw new Error("Not connected");
@@ -268,13 +268,13 @@ export function useVaultContract(
     // Validate share balance
     if (!shareBalance) throw new Error("No shares to withdraw");
 
-    // TODO: include neutronRecieverAddress in the withdraw request
+    // TODO: include neutronReceiverAddress in the withdraw request
 
     try {
       setWithdrawRequest({
         sharesAmount: shares,
         evmAddress: address,
-        neutronRecieverAddress,
+        neutronReceiverAddress,
         redemptionRate: redemptionRate ?? BigInt(0),
         withdrawId: 0,
       });
@@ -394,12 +394,12 @@ interface UseVaultContractReturnValue {
     shares,
     maxLossBps,
     allowSolverCompletion,
-    neutronRecieverAddress,
+    neutronReceiverAddress,
   }: {
     shares: string;
     maxLossBps?: number;
     allowSolverCompletion?: boolean;
-    neutronRecieverAddress: string;
+    neutronReceiverAddress: string;
   }) => Promise<`0x${string}` | undefined>;
   previewDeposit: (amount: string) => Promise<string>;
   previewRedeem: (shares: string) => Promise<string>;

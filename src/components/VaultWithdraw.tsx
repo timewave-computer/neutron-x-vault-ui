@@ -4,24 +4,24 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput, shortenAddress } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { useAccounts, AllVaultData } from "@/hooks";
+import { useAccounts, VaultSummaryData } from "@/hooks";
 import { useWalletModal } from "@/context";
 import { getChainInfo } from "@/const/chains";
 
 interface VaultWithdrawProps {
-  vaultData: AllVaultData;
+  vaultData: VaultSummaryData;
   maxRedeemableShares: string | undefined;
   previewRedeem: (amount: string) => Promise<string>;
   withdrawShares: ({
     shares,
     maxLossBps,
     allowSolverCompletion,
-    neutronRecieverAddress,
+    neutronReceiverAddress,
   }: {
     shares: string;
     maxLossBps?: number;
     allowSolverCompletion?: boolean;
-    neutronRecieverAddress: string;
+    neutronReceiverAddress: string;
   }) => Promise<`0x${string}` | undefined>;
   onWithdrawSuccess: (hash: `0x${string}`) => void;
   onWithdrawError: (error: Error) => void;
@@ -65,12 +65,12 @@ export const VaultWithdraw = ({
   });
 
   const { mutate: handleWithdraw, isPending: isWithdrawing } = useMutation({
-    mutationFn: async (neutronRecieverAddress: string) => {
+    mutationFn: async (neutronReceiverAddress: string) => {
       if (!withdrawInput || !isConnected || !vaultData)
         throw new Error("Unable to initiate withdrawal");
       const result = await withdrawShares({
         shares: withdrawInput,
-        neutronRecieverAddress,
+        neutronReceiverAddress,
       });
       if (!result) throw new Error("Transaction failed");
       return result;

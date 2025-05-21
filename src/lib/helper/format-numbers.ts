@@ -33,3 +33,15 @@ export function formatNumberString(
 
   return `${formatted} ${symbol}`;
 }
+
+// convert micro denom to denom
+export const microToBase = (
+  amount: number | string,
+  decimals: number,
+): number => {
+  if (typeof amount === "string") {
+    amount = Number(amount);
+  }
+  amount = amount / Math.pow(10, decimals);
+  return isNaN(amount) ? 0 : amount;
+};

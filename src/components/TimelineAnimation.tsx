@@ -68,6 +68,7 @@ export const TimelineAnimation = ({
     lineAnimationDuration,
     onStepChange,
     controlledStep,
+    autoAnimate,
   ]);
 
   return (
