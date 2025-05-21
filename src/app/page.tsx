@@ -38,7 +38,7 @@ export default function Home() {
             </p>
           ) : (
             vaults.map((vault) => {
-              const tvl = formatNumberString(vault.tvl, vault.token, {
+              const tvl = formatNumberString(vault.tvl, vault.symbol, {
                 displayDecimals: 2,
               });
 
@@ -48,7 +48,7 @@ export default function Home() {
 
               const userVaultAssets = formatNumberString(
                 vault.userVaultAssets,
-                vault.token,
+                vault.symbol,
                 {
                   displayDecimals: 2,
                 },

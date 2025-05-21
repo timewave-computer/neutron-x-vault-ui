@@ -19,3 +19,21 @@
 export const isValidNumberInput = (value: string) => {
   return /^\d*\.?\d*$/.test(value);
 };
+
+/***
+ * Reusable function to validate number input
+ * @param value - The value to handle
+ * @param setValue - The function to set the value
+ */
+export const handleNumberInput = (
+  value: string,
+  setValue: (value: string) => void,
+) => {
+  if (value === "") {
+    setValue("");
+  }
+  // Only allow positive numbers
+  if (isValidNumberInput(value) && parseFloat(value) >= 0) {
+    setValue(value);
+  }
+};

@@ -1,45 +1,65 @@
-import React from "react";
-import { Button, Card, Tooltip, WithdrawTimer } from "@/components";
-import { useAccount } from "wagmi";
-import { unixTimestampToDateString } from "@/lib/helper/time-format";
+"use client";
+import React, { useState, useEffect } from "react";
+import { Card, TimelineAnimation } from "@/components";
+import { VaultSummaryData, WithdrawRequest } from "@/hooks";
+import { useStargateClient } from "graz";
+import { useQuery } from "@tanstack/react-query";
+import { shortenAddress, microToBase } from "@/lib/helper";
+import { QUERY_KEYS } from "@/const";
 
 interface WithdrawInProgressProps {
-  copy: {
-    title: string;
-    description: string;
-    cta: string;
-  };
-  claimableAtTimestamp?: number;
-  timeRemaining?: string | null;
-  withdrawSharesAmount?: string;
-  withdrawAssetAmount?: string;
-  withdrawRate?: string;
-  isClaimable?: boolean;
-  hasActiveWithdraw?: boolean;
-  onCompleteWithdraw: () => void;
-  isCompletingWithdraw: boolean;
+  vaultData: VaultSummaryData;
+  withdrawRequest?: WithdrawRequest;
 }
 
 export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
-  copy,
-  claimableAtTimestamp,
-  timeRemaining,
-  withdrawSharesAmount,
-  withdrawAssetAmount,
-  withdrawRate,
-  isClaimable,
-  hasActiveWithdraw,
-  onCompleteWithdraw,
-  isCompletingWithdraw,
+  vaultData,
+  withdrawRequest,
 }) => {
-  const { isConnected } = useAccount();
-  if (!hasActiveWithdraw) {
+  const {
+    cosmos: { chainId: cosmosChainId },
+    copy,
+  } = vaultData;
+
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const { data: neutronClient } = useStargateClient({
+    chainId: cosmosChainId,
+  });
+
+  useEffect(() => {
+    // temporary to simulate the success of the transfer.
+    if (!isCompleted) {
+      const timer = setInterval(() => {
+        setIsCompleted(true);
+      }, 5000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isCompleted, setIsCompleted]);
+
+  const { data: neutronAccountBalance } = useQuery({
+    queryKey: [
+      QUERY_KEYS.NEUTRON_ACCOUNT_BALANCE,
+      withdrawRequest?.evmAddress,
+      withdrawRequest?.neutronReceiverAddress,
+    ],
+    enabled: !!neutronClient && !!withdrawRequest?.neutronReceiverAddress,
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const balance = await neutronClient?.getBalance(
+        withdrawRequest?.neutronReceiverAddress ?? "",
+        vaultData.cosmos.token.denom,
+      );
+      return microToBase(balance?.amount ?? 0, vaultData.cosmos.token.decimals);
+    },
+  });
+
+  if (!withdrawRequest) {
     return null;
   }
 
-  const claimableAtTimestampFormatted = claimableAtTimestamp
-    ? unixTimestampToDateString(claimableAtTimestamp, "toLocaleString")
-    : "N/A";
+  const { convertedAssetAmount, neutronReceiverAddress } = withdrawRequest;
 
   return (
     <div className="mt-8">
@@ -50,87 +70,53 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
         <div className="py-4">
           <div className="flex flex-col px-4 max-w-[1200px]">
             <div className="text-xl font-beast text-accent-purple mb-2">
-              {copy.title}
+              {isCompleted
+                ? copy.withdrawCompleted.title
+                : copy.withdrawInProgress.title}
             </div>
             <div>
               <div className="space-y-1">
-                <p>{copy.description}</p>
-                <div className="flex items-center gap-1">
-                  Why do I have to wait?
-                  <Tooltip
-                    content={
-                      <div>
-                        <p className="font-medium mb-1">
-                          Two-Step Withdrawal Process
-                        </p>
-                        <p className="mb-2">
-                          This is a cross-chain vault, which means your assets
-                          need to be moved back to the source chain before they
-                          can be withdrawn.
-                        </p>
-                        <p className="font-medium mb-1">
-                          Step 1: Clearing Period
-                        </p>
-                        <p className="mb-2">
-                          When you initiate a withdrawal, your funds enter a
-                          clearing period where they are moved from the
-                          destination chain back to the source chain. This
-                          process takes time to complete safely.
-                        </p>
-                        <p className="font-medium mb-1">
-                          Step 2: Final Withdrawal
-                        </p>
-                        <p>
-                          Once your funds have returned to the source chain,
-                          they become claimable. At this point, you must
-                          manually complete the withdrawal by clicking "Transfer
-                          to Wallet".
-                        </p>
-                      </div>
-                    }
-                  />
-                </div>
+                <p>
+                  {isCompleted
+                    ? copy.withdrawCompleted.description
+                    : copy.withdrawInProgress.description}
+                </p>
+                <p>
+                  {isCompleted
+                    ? `Withdrawal complete. ${convertedAssetAmount} ${vaultData.symbol} has been transferred to your wallet.`
+                    : `Withdrawing ${convertedAssetAmount} ${vaultData.symbol} to ${shortenAddress(neutronReceiverAddress)}.`}
+                </p>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* col 1 */}
-              <div className="">
-                <WithdrawTimer
-                  initialTimeRemaining={
-                    isClaimable ? "00:00:00" : timeRemaining || "00:00:00"
-                  }
-                  isClaimable={!!isClaimable}
-                  claimTime={claimableAtTimestampFormatted || "N/A"}
-                >
-                  Claimable after: {claimableAtTimestampFormatted}
-                </WithdrawTimer>
+              <div className="flex flex-col w-full items-center pb-2">
+                <TimelineAnimation
+                  currentStep={isCompleted ? 1 : 0}
+                  steps={copy.withdrawInProgress.steps}
+                ></TimelineAnimation>
               </div>
 
               {/* col 2 */}
               <div>
                 <div className="flex flex-col w-full items-center">
-                  <span className="text-2xl font-beast text-accent-purple">
-                    {withdrawAssetAmount}
-                  </span>
-                  <span className="text-sm text-accent-purple">
-                    {withdrawSharesAmount}{" "}
-                    {withdrawRate && Number(withdrawRate) > 0 && (
-                      <>at {withdrawRate}% </>
-                    )}
-                  </span>
+                  <div className="text-xs text-gray-500 mb-1">
+                    Real-time Balance
+                  </div>
+                  <div className="text-3xl font-beast text-accent-purple">
+                    {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
+                    {vaultData.symbol}
+                  </div>
+                  <a
+                    href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronReceiverAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-sm font-light text-gray-400 mb-1"
+                  >
+                    {neutronReceiverAddress}
+                  </a>
                 </div>
-                <Button
-                  className="w-full mt-2"
-                  onClick={onCompleteWithdraw}
-                  disabled={
-                    !isConnected || isCompletingWithdraw || !isClaimable
-                  }
-                  variant="primary"
-                  isLoading={isCompletingWithdraw}
-                >
-                  {isCompletingWithdraw ? "Processing..." : copy.cta}
-                </Button>
               </div>
             </div>
           </div>

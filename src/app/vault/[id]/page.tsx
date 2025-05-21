@@ -7,46 +7,41 @@ import {
   useTokenBalances,
   useAccounts,
 } from "@/hooks";
-import { useState } from "react";
-import { formatNumberString, isValidNumberInput } from "@/lib";
+import { formatNumberString } from "@/lib";
 import { useToast } from "@/context";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/const";
 import {
-  Button,
-  Input,
   Card,
   WithdrawInProgress,
   DepositInProgress,
+  VaultWithdraw,
+  VaultDeposit,
 } from "@/components";
 
 export default function VaultPage({ params }: { params: { id: string } }) {
   const { isConnected, evmAccount } = useAccounts();
   const { showToast } = useToast();
-  const [depositInput, setDepositInput] = useState("");
-  const [withdrawInput, setWithdrawInput] = useState("");
-  const address = evmAccount?.address;
+  const evmAddress = evmAccount?.address;
   const {
     vaults,
     isLoading: isLoadingVaults,
     isError: isVaultsError,
   } = useViewAllVaults();
   const vaultData = vaults?.find((v) => v.vaultId === params.id);
-  const tokenSymbol = vaultData?.token ?? "";
+  const tokenSymbol = vaultData?.symbol ?? "";
 
   const { ethBalance, tokenBalances } = useTokenBalances({
-    address,
-    tokenAddresses: vaultData ? [vaultData.tokenAddress] : [],
+    address: evmAddress,
+    tokenAddresses: vaultData ? [vaultData.evm.tokenAddress] : [],
   });
   const userTokenBalance = tokenBalances?.data?.find(
-    (token) => token?.address === vaultData?.tokenAddress,
+    (token) => token?.address === vaultData?.evm.tokenAddress,
   )?.balance;
 
   const {
     depositWithAmount,
     withdrawShares,
     refetch: refetchVaultContract,
-    completeWithdraw,
+
     previewRedeem,
     previewDeposit,
     data: {
@@ -54,160 +49,23 @@ export default function VaultPage({ params }: { params: { id: string } }) {
       maxRedeemableShares,
       shareBalance: userShares,
       assetBalance: userVaultAssets,
-      pendingWithdraw,
+      withdrawRequest,
     },
     isLoading: isLoadingContract,
     isError: isContractError,
   } = useVaultContract({
     vaultMetadata: vaultData
       ? {
-          vaultProxyAddress: vaultData.vaultProxyAddress,
-          tokenAddress: vaultData.tokenAddress,
+          vaultProxyAddress: vaultData.evm.vaultProxyAddress,
+          tokenAddress: vaultData.evm.tokenAddress,
           tokenDecimals: vaultData.tokenDecimals,
           shareDecimals: vaultData.shareDecimals,
-          token: vaultData.token,
+          token: vaultData.symbol,
           transactionConfirmationTimeout:
-            vaultData.transactionConfirmationTimeout,
+            vaultData.evm.transactionConfirmationTimeout,
         }
       : undefined,
   });
-
-  const { data: previewDepositAmount } = useQuery({
-    enabled:
-      !!vaultData?.vaultProxyAddress &&
-      parseFloat(depositInput) > 0 &&
-      isConnected,
-    staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_DEPOSIT,
-      vaultData?.vaultProxyAddress,
-      depositInput,
-    ],
-    queryFn: () => {
-      return previewDeposit(depositInput);
-    },
-  });
-
-  const { data: previewRedeemAmount } = useQuery({
-    enabled:
-      !!vaultData?.vaultProxyAddress &&
-      parseFloat(withdrawInput) > 0 &&
-      isConnected,
-    staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_WITHDRAW,
-      vaultData?.vaultProxyAddress,
-      withdrawInput,
-    ],
-    queryFn: () => {
-      return previewRedeem(withdrawInput);
-    },
-  });
-
-  const { mutate: handleDeposit, isPending: isDepositing } = useMutation({
-    mutationFn: async () => {
-      if (!depositInput || !isConnected || !vaultData)
-        throw new Error("Unable to initiate deposit");
-      return depositWithAmount(depositInput);
-    },
-    onSuccess: (hash) => {
-      setDepositInput("");
-      const toastDescription = vaultData?.aprPercentage
-        ? `Your funds are now earning ${vaultData?.aprPercentage}% APY!`
-        : "Funds are now earning yield.";
-      showToast({
-        title: "Deposit successful",
-        description: toastDescription,
-        type: "success",
-        txHash: hash,
-      });
-      refetchVaultContract();
-      ethBalance.refetch();
-    },
-    onError: (err) => {
-      if (err instanceof Error) {
-        showToast({
-          title: "Transaction failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        console.error("Failed to deposit", err);
-        showToast({
-          title: "Failed to deposit",
-          type: "error",
-        });
-      }
-    },
-  });
-
-  const { mutate: handleWithdraw, isPending: isWithdrawing } = useMutation({
-    mutationFn: async () => {
-      if (!withdrawInput || !isConnected || !vaultData)
-        throw new Error("Unable to initiate withdrawal");
-      return withdrawShares(withdrawInput);
-    },
-    onSuccess: (hash) => {
-      setWithdrawInput("");
-      showToast({
-        title: "Withdraw initiation submitted",
-        description: "Assets will be claimable after the unbonding period.",
-        type: "success",
-        txHash: hash,
-      });
-      ethBalance.refetch();
-      refetchVaultContract();
-    },
-    onError: (err) => {
-      if (err instanceof Error) {
-        showToast({
-          title: "Transaction failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        console.error("Failed to withdraw", err);
-        showToast({
-          title: "Failed to withdraw",
-          type: "error",
-        });
-      }
-    },
-  });
-
-  const { mutate: handleCompleteWithdraw, isPending: isCompletingWithdraw } =
-    useMutation({
-      mutationFn: async () => {
-        if (!isConnected || !vaultData)
-          throw new Error("Unable to complete withdrawal");
-        return completeWithdraw();
-      },
-      onSuccess: (hash) => {
-        showToast({
-          title: "Withdraw successful",
-          description: "Your withdraw has been completed successfully.",
-          type: "success",
-          txHash: hash,
-        });
-        ethBalance.refetch();
-        refetchVaultContract();
-      },
-      onError: (err) => {
-        if (err instanceof Error) {
-          showToast({
-            title: "Transaction failed",
-            description: err.message,
-            type: "error",
-          });
-        } else {
-          console.error("Failed to complete withdrawal", err);
-          showToast({
-            title: "Failed to complete withdrawal",
-            type: "error",
-          });
-        }
-      },
-    });
 
   const userSharesFormatted = formatNumberString(userShares, "shares", {
     displayDecimals: 2,
@@ -224,21 +82,6 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   const vaultTvlFormatted = formatNumberString(tvl, tokenSymbol, {
     displayDecimals: 2,
   });
-
-  const isWithdrawDisabled =
-    !isConnected ||
-    !withdrawInput ||
-    isWithdrawing ||
-    !maxRedeemableShares ||
-    maxRedeemableShares === "0" ||
-    parseFloat(withdrawInput) > parseFloat(maxRedeemableShares);
-
-  const isDepositDisabled =
-    !isConnected ||
-    !depositInput ||
-    isDepositing ||
-    !userTokenBalance ||
-    parseFloat(depositInput) > parseFloat(userTokenBalance);
 
   const isLoading = isLoadingVaults || isLoadingContract;
   const isError = isVaultsError || isContractError;
@@ -283,12 +126,12 @@ export default function VaultPage({ params }: { params: { id: string } }) {
               <p>
                 Vault Address:{" "}
                 <a
-                  href={`https://etherscan.io/address/${vaultData.vaultProxyAddress}`}
+                  href={`${vaultData.evm.explorerUrl}/address/${vaultData.evm.vaultProxyAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  {vaultData.vaultProxyAddress}
+                  {vaultData.evm.vaultProxyAddress}
                 </a>
               </p>
               <p className="mt-2">{vaultData.copy.description}</p>
@@ -331,228 +174,71 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           maxRedeemableShares &&
           parseFloat(maxRedeemableShares) > 0 &&
           // contains copy for vault path and on deposit success
-          !pendingWithdraw?.hasActiveWithdraw && (
+          !withdrawRequest && (
             <DepositInProgress copy={vaultData.copy.depositInProgress} />
           )}
 
         {/*shows when user has a pending withdrawal */}
-        {isConnected &&
-          pendingWithdraw &&
-          pendingWithdraw?.hasActiveWithdraw && (
-            <WithdrawInProgress
-              hasActiveWithdraw={pendingWithdraw.hasActiveWithdraw}
-              isClaimable={pendingWithdraw.isClaimable}
-              withdrawAssetAmount={`${pendingWithdraw.withdrawAssetAmount} ${tokenSymbol}`}
-              withdrawSharesAmount={`${pendingWithdraw.withdrawSharesAmount} shares`}
-              copy={vaultData?.copy.withdrawInProgress}
-              claimableAtTimestamp={
-                pendingWithdraw.claimableAtTimestamp ?? undefined
-              }
-              timeRemaining={pendingWithdraw.timeRemaining}
-              onCompleteWithdraw={handleCompleteWithdraw}
-              isCompletingWithdraw={isCompletingWithdraw}
-            />
-          )}
+        {isConnected && withdrawRequest && (
+          <WithdrawInProgress
+            vaultData={vaultData}
+            withdrawRequest={withdrawRequest}
+          />
+        )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Deposit Section */}
-          <Card variant="primary">
-            <div className="mb-6">
-              <h3 className="text-lg font-beast text-accent-purple">
-                {vaultData.copy.deposit.title}
-              </h3>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-sm text-gray-500">
-                  {vaultData.copy.deposit.description}
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-500">
-                    Available: {`${userTokenBalance} ${tokenSymbol}`}
-                  </p>
-                  <Button
-                    onClick={() => setDepositInput(userTokenBalance ?? "0")}
-                    disabled={!isConnected}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    MAX
-                  </Button>
-                </div>
-              </div>
-            </div>
+          <VaultDeposit
+            vaultData={vaultData}
+            userTokenBalance={userTokenBalance}
+            isConnected={isConnected}
+            previewDeposit={previewDeposit}
+            depositWithAmount={depositWithAmount}
+            onDepositSuccess={(hash: `0x${string}`) => {
+              const toastDescription = vaultData?.aprPercentage
+                ? `Your funds are now earning ${vaultData?.aprPercentage}% APY!`
+                : "Funds are now earning yield.";
+              showToast({
+                title: "Deposit successful",
+                description: toastDescription,
+                type: "success",
+                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
+              });
+              refetchVaultContract();
+              ethBalance.refetch();
+            }}
+            onDepositError={(err: Error) => {
+              showToast({
+                title: "Transaction failed",
+                description: err.message,
+                type: "error",
+              });
+            }}
+          />
 
-            {/* Deposit input */}
-            <div className="flex rounded-lg border-2 border-primary/40">
-              <Input
-                type="number"
-                id="depositInput"
-                name="depositInput"
-                aria-label={`Deposit amount in ${tokenSymbol}`}
-                placeholder="0.0"
-                min="0"
-                step="any"
-                inputMode="decimal"
-                value={depositInput}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleNumberInput(value, setDepositInput);
-                }}
-                isEnabled={isConnected && !isDepositing}
-                isError={
-                  parseFloat(depositInput) > parseFloat(userTokenBalance ?? "0")
-                }
-              />
-
-              <div className="flex items-center bg-primary-light px-4 text-base text-black border-l-2 border-primary/40 rounded-r-lg">
-                {tokenSymbol}
-              </div>
-            </div>
-
-            <Button
-              className="mt-4"
-              onClick={() => handleDeposit()}
-              disabled={isDepositDisabled}
-              variant="primary"
-              fullWidth
-              isLoading={isDepositing}
-            >
-              {isDepositing
-                ? "Confirm in Wallet..."
-                : vaultData.copy.deposit.cta}
-            </Button>
-
-            {/* Deposit estimate and warning display */}
-            <div className="h-6 mt-2 flex justify-between items-center">
-              {depositInput &&
-                previewDepositAmount &&
-                parseFloat(depositInput) > 0 && (
-                  <p className="text-sm text-gray-500">
-                    ≈ {previewDepositAmount} shares
-                  </p>
-                )}
-              {isConnected &&
-                depositInput &&
-                userTokenBalance &&
-                parseFloat(depositInput) > parseFloat(userTokenBalance) && (
-                  <p className="text-sm text-secondary">
-                    Insufficient {tokenSymbol} balance
-                  </p>
-                )}
-            </div>
-          </Card>
-
-          {/* Withdraw Section */}
-          <Card variant="primary">
-            <div className="mb-6">
-              <h3 className="text-lg font-beast text-accent-purple mb-1">
-                {vaultData.copy.withdraw.title}
-              </h3>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-sm text-gray-500">
-                  {vaultData.copy.withdraw.description}
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-500">
-                    Available: {maxRedeemableShares} shares
-                  </p>
-                  <Button
-                    onClick={() => setWithdrawInput(maxRedeemableShares ?? "0")}
-                    disabled={!isConnected}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    MAX
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Withdraw input */}
-            <div className="flex rounded-lg border-2 border-primary/40">
-              <Input
-                type="number"
-                id="withdrawInput"
-                name="withdrawInput"
-                aria-label="Withdraw shares amount"
-                min="0"
-                step="any"
-                inputMode="decimal"
-                value={withdrawInput}
-                placeholder="0.0"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleNumberInput(value, setWithdrawInput);
-                }}
-                isEnabled={isConnected && !isWithdrawing}
-                isError={
-                  parseFloat(withdrawInput) >
-                  parseFloat(maxRedeemableShares ?? "0")
-                }
-              />
-
-              <div className="flex items-center bg-primary-light px-4 text-base text-black border-l-2 border-primary/40 rounded-r-lg">
-                Shares
-              </div>
-            </div>
-
-            <Button
-              className="mt-4"
-              onClick={() => handleWithdraw()}
-              disabled={isWithdrawDisabled}
-              variant="primary"
-              fullWidth
-              isLoading={isWithdrawing}
-            >
-              {isWithdrawing
-                ? "Confirm in Wallet..."
-                : vaultData.copy.withdraw.cta}
-            </Button>
-
-            {/* Withdraw estimate and warning display */}
-            <div className="h-6 mt-4 flex justify-between items-center">
-              {withdrawInput &&
-                parseFloat(withdrawInput) > 0 &&
-                previewRedeemAmount && (
-                  <p className="text-sm text-gray-500">
-                    ≈ {previewRedeemAmount} {tokenSymbol}
-                  </p>
-                )}
-              {isConnected &&
-                withdrawInput &&
-                (!maxRedeemableShares || maxRedeemableShares === "0") && (
-                  <p className="text-sm text-secondary">
-                    You need vault shares to withdraw
-                  </p>
-                )}{" "}
-              {isConnected &&
-                withdrawInput &&
-                maxRedeemableShares &&
-                parseFloat(withdrawInput) > parseFloat(maxRedeemableShares) && (
-                  <p className="text-sm text-secondary">
-                    Insufficient vault balance
-                  </p>
-                )}
-            </div>
-          </Card>
+          <VaultWithdraw
+            vaultData={vaultData}
+            maxRedeemableShares={maxRedeemableShares}
+            previewRedeem={previewRedeem}
+            withdrawShares={withdrawShares}
+            onWithdrawSuccess={(hash: `0x${string}`) => {
+              showToast({
+                title: "Withdraw submitted",
+                description: "Assets will be sent to your Neutron account.",
+                type: "success",
+                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
+              });
+              ethBalance.refetch();
+              refetchVaultContract();
+            }}
+            onWithdrawError={(err: Error) => {
+              showToast({
+                title: "Transaction failed",
+                description: err.message,
+                type: "error",
+              });
+            }}
+          />
         </div>
       </div>
     </div>
   );
 }
-
-/***
- * Reusable function to validate number input
- * @param value - The value to handle
- * @param setValue - The function to set the value
- */
-const handleNumberInput = (
-  value: string,
-  setValue: (value: string) => void,
-) => {
-  if (value === "") {
-    setValue("");
-  }
-  // Only allow positive numbers
-  if (isValidNumberInput(value) && parseFloat(value) >= 0) {
-    setValue(value);
-  }
-};

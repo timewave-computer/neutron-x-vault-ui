@@ -11,10 +11,18 @@ import { z } from "zod";
  *
  */
 
-export type VaultConfig = z.infer<typeof vaultConfigSchema> & {
+type VaultConfigSchema = z.infer<typeof vaultConfigSchema>;
+
+export type VaultConfig = VaultConfigSchema & {
   vaultAddress: Address;
-  vaultProxyAddress: Address;
-  tokenAddress: Address;
+  evm: {
+    vaultProxyAddress: Address;
+    tokenAddress: Address;
+  };
+  cosmos: {
+    vaultAddress: Address;
+    tokenAddress: Address;
+  };
   startBlock: bigint;
 };
 

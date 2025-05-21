@@ -5,25 +5,9 @@ import { useAccount, useConfig } from "wagmi";
 import { QUERY_KEYS, valenceVaultABI } from "@/const";
 import { readContract, readContracts } from "@wagmi/core";
 import { erc20Abi } from "viem";
-import {
-  fetchAprFromApi,
-  fetchAprFromContract,
-  formatBigInt,
-  parseWithdrawRequest,
-} from "@/lib";
+import { fetchAprFromApi, fetchAprFromContract, formatBigInt } from "@/lib";
 import { useQueries } from "@tanstack/react-query";
 import { useVaultsConfig, type VaultConfig } from "@/context";
-
-export type VaultData = VaultConfig & {
-  tokenDecimals: number;
-  shareDecimals: number;
-  aprPercentage?: string;
-  totalShares: bigint;
-  userVaultShares: bigint;
-  userVaultAssets: bigint;
-  tvl: bigint;
-  redemptionRate: bigint;
-};
 
 export function useViewAllVaults(): UseViewAllVaultsReturnValue {
   const { address, chainId } = useAccount();
@@ -37,33 +21,33 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
         contracts: [
           {
             abi: erc20Abi,
-            address: vault.tokenAddress,
+            address: vault.evm.tokenAddress,
             functionName: "decimals",
             args: [],
           },
           {
             abi: valenceVaultABI,
-            address: vault.vaultProxyAddress,
+            address: vault.evm.vaultProxyAddress,
             functionName: "decimals",
             args: [],
           },
           {
             // tvl
             abi: valenceVaultABI,
-            address: vault.vaultProxyAddress,
+            address: vault.evm.vaultProxyAddress,
             functionName: "totalAssets",
             args: [],
           },
           {
             // total shares
             abi: valenceVaultABI,
-            address: vault.vaultProxyAddress,
+            address: vault.evm.vaultProxyAddress,
             functionName: "totalSupply",
             args: [],
           },
           {
             abi: valenceVaultABI,
-            address: vault.vaultProxyAddress,
+            address: vault.evm.vaultProxyAddress,
             functionName: "redemptionRate",
             args: [],
           },
@@ -71,7 +55,7 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
       });
 
       if (!generalVaultData) {
-        throw new Error("Failed to fetch general vault data");
+        throw new Error("Failed to fetch all vault data");
       }
       const tokenDecimals = Number(generalVaultData[0].result);
       const shareDecimals = Number(generalVaultData[1].result);
@@ -80,54 +64,27 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
       const redemptionRate = generalVaultData[4].result;
       if (!tokenDecimals || !shareDecimals) {
         // if these are undefined, unit conversions cannot be done
-        throw new Error("Failed to fetch general vault data");
+        throw new Error("Failed to fetch all vault data");
       }
 
       let userVaultShares = BigInt(0);
       let userVaultAssets = BigInt(0);
-      let sharesInWithdrawRequest = BigInt(0);
-      let assetsInWithdrawRequest = BigInt(0);
 
       if (address) {
         userVaultShares = await readContract(config, {
           abi: valenceVaultABI,
-          address: vault.vaultProxyAddress,
+          address: vault.evm.vaultProxyAddress,
           functionName: "balanceOf",
           args: [address as `0x${string}`],
         });
 
         userVaultAssets = await readContract(config, {
           abi: valenceVaultABI,
-          address: vault.vaultProxyAddress,
+          address: vault.evm.vaultProxyAddress,
           functionName: "convertToAssets",
           args: [userVaultShares],
         });
-
-        const _userWithdrawRequest = await readContract(config, {
-          abi: valenceVaultABI,
-          address: vault.vaultProxyAddress,
-          functionName: "userWithdrawRequest",
-          args: [address as `0x${string}`],
-        });
-
-        const userWithdrawRequest = parseWithdrawRequest(_userWithdrawRequest);
-
-        if (userWithdrawRequest) {
-          const withdrawAssetAmount = await readContract(config, {
-            abi: valenceVaultABI,
-            address: vault.vaultProxyAddress,
-            functionName: "convertToAssets",
-            args: [userWithdrawRequest.withdrawSharesAmount],
-          });
-
-          sharesInWithdrawRequest = userWithdrawRequest.withdrawSharesAmount;
-          assetsInWithdrawRequest = withdrawAssetAmount;
-        }
       }
-
-      // for better UX, include shares in withdraw request in the users balance
-      const syntheticShareBalance = userVaultShares + sharesInWithdrawRequest;
-      const syntheticAssetBalance = userVaultAssets + assetsInWithdrawRequest;
 
       let apr: string | undefined = undefined;
       if (vault.aprRequest.type === "contract") {
@@ -146,8 +103,8 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
         aprPercentage,
         totalShares: formatBigInt(totalShares ?? BigInt(0), shareDecimals),
         tvl: formatBigInt(tvl ?? BigInt(0), tokenDecimals),
-        userVaultShares: formatBigInt(syntheticShareBalance, shareDecimals),
-        userVaultAssets: formatBigInt(syntheticAssetBalance, tokenDecimals),
+        userVaultShares: formatBigInt(userVaultShares, shareDecimals),
+        userVaultAssets: formatBigInt(userVaultAssets, tokenDecimals),
         redemptionRate: formatBigInt(
           redemptionRate ?? BigInt(0),
           shareDecimals,
@@ -165,7 +122,7 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
   } = useQueries({
     queries: vaultsConfig
       .filter((vaultConfig) =>
-        chainId ? vaultConfig.chainId === chainId : true,
+        chainId ? vaultConfig.evm.chainId === chainId : true,
       )
       .map((vaultConfig) => ({
         refetchInterval: 30000, // 30 seconds
@@ -205,25 +162,20 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
   };
 }
 
+export type VaultSummaryData = VaultConfig & {
+  tokenDecimals: number;
+  shareDecimals: number;
+  aprPercentage?: string;
+  totalShares: string;
+  userVaultShares: string;
+  userVaultAssets: string;
+  tvl: string;
+  redemptionRate: string;
+};
+
 export type UseViewAllVaultsReturnValue = {
   isLoading: boolean;
   isError: boolean;
-  vaults: Array<{
-    token: string;
-    tvl: string;
-    aprPercentage?: string;
-    totalShares: string;
-    userVaultShares: string;
-    userVaultAssets: string;
-    redemptionRate: string;
-    tokenDecimals: number;
-    shareDecimals: number;
-    vaultId: string;
-    vaultProxyAddress: `0x${string}`;
-    tokenAddress: `0x${string}`;
-    copy: VaultConfig["copy"];
-    transactionConfirmationTimeout: number;
-    startBlock: number;
-  }>;
+  vaults: Array<VaultSummaryData>;
   chainId?: number;
 };

@@ -26,20 +26,36 @@ const aprRequestSchema = z.union([
   aprApiRequestSchema,
 ]);
 
-export const vaultConfigSchema = z.object({
+const evmSchema = z.object({
   chainId: z.number(),
-  vaultId: z.string(),
   vaultAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault address"),
   vaultProxyAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault proxy address"),
+  transactionConfirmationTimeout: z.number(),
   tokenAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid token address"),
-  transactionConfirmationTimeout: z.number(),
   startBlock: z.number(),
+  explorerUrl: z.string(),
+});
+
+const cosmosSchema = z.object({
+  chainId: z.string(),
+  explorerUrl: z.string(),
+  token: z.object({
+    denom: z.string(),
+    decimals: z.number(),
+  }),
+  startBlock: z.number(),
+});
+export const vaultConfigSchema = z.object({
+  vaultId: z.string(),
+  symbol: z.string(),
+  evm: evmSchema,
+  cosmos: cosmosSchema,
   copy: z.object({
     name: z.string(),
     description: z.string(),
@@ -58,13 +74,15 @@ export const vaultConfigSchema = z.object({
       description: z.string(),
       cta: z.string(),
     }),
-
     withdrawInProgress: z.object({
       title: z.string(),
       description: z.string(),
-      cta: z.string(),
+      steps: z.array(z.string()),
+    }),
+    withdrawCompleted: z.object({
+      title: z.string(),
+      description: z.string(),
     }),
   }),
-  token: z.string(),
   aprRequest: aprRequestSchema,
 });
