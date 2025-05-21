@@ -67,7 +67,8 @@ export function useVaultContract(
   const publicClient = usePublicClient();
   const { evm: walletClient } = useWalletClient();
   const config = useConfig();
-  // temporary state to mock withdraw in progress
+
+  // TEMPORARY: this should be queried from an indexer. This is not implemented yet.
   const [withdrawRequest, setWithdrawRequest] = useState<
     WithdrawRequest | undefined
   >(undefined);
@@ -271,6 +272,7 @@ export function useVaultContract(
     // TODO: include neutronReceiverAddress in the withdraw request
 
     try {
+      // TEMPORARY: Return mock transaction hash until actual implementation is ready
       setWithdrawRequest({
         sharesAmount: shares,
         evmAddress: address,
@@ -278,7 +280,10 @@ export function useVaultContract(
         redemptionRate: redemptionRate ?? BigInt(0),
         withdrawId: 0,
       });
+
       return "0xplaceholder";
+
+      // The below is an example of the actual implementation
 
       // const parsedShares = parseUnits(shares, Number(shareDecimals));
 
