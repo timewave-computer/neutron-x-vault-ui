@@ -86,7 +86,7 @@ export const VaultWithdraw = ({
     },
   });
 
-  const isDisabled =
+  const isWithdrawDisabled =
     !isEvmConnected ||
     !withdrawInput ||
     isWithdrawing ||
@@ -161,7 +161,7 @@ export const VaultWithdraw = ({
             <Button
               className="mt-4"
               onClick={() => handleWithdraw(userCosmosAddress)}
-              disabled={isDisabled}
+              disabled={isWithdrawDisabled}
               variant="primary"
               fullWidth
               isLoading={isWithdrawing}
