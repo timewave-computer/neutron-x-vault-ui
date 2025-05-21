@@ -9,10 +9,13 @@ import {
 } from "@/hooks";
 import { formatNumberString } from "@/lib";
 import { useToast } from "@/context";
-import { useMutation } from "@tanstack/react-query";
-import { Card, WithdrawInProgress, DepositInProgress } from "@/components";
-import { VaultDeposit } from "@/components/VaultDeposit";
-import { VaultWithdraw } from "@/components/VaultWithdraw";
+import {
+  Card,
+  WithdrawInProgress,
+  DepositInProgress,
+  VaultWithdraw,
+  VaultDeposit,
+} from "@/components";
 
 export default function VaultPage({ params }: { params: { id: string } }) {
   const { isConnected, evmAccount } = useAccounts();
@@ -24,14 +27,14 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     isError: isVaultsError,
   } = useViewAllVaults();
   const vaultData = vaults?.find((v) => v.vaultId === params.id);
-  const tokenSymbol = vaultData?.token ?? "";
+  const tokenSymbol = vaultData?.symbol ?? "";
 
   const { ethBalance, tokenBalances } = useTokenBalances({
     address: evmAddress,
-    tokenAddresses: vaultData ? [vaultData.tokenAddress] : [],
+    tokenAddresses: vaultData ? [vaultData.evm.tokenAddress] : [],
   });
   const userTokenBalance = tokenBalances?.data?.find(
-    (token) => token?.address === vaultData?.tokenAddress,
+    (token) => token?.address === vaultData?.evm.tokenAddress,
   )?.balance;
 
   const {
@@ -53,13 +56,13 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   } = useVaultContract({
     vaultMetadata: vaultData
       ? {
-          vaultProxyAddress: vaultData.vaultProxyAddress,
-          tokenAddress: vaultData.tokenAddress,
+          vaultProxyAddress: vaultData.evm.vaultProxyAddress,
+          tokenAddress: vaultData.evm.tokenAddress,
           tokenDecimals: vaultData.tokenDecimals,
           shareDecimals: vaultData.shareDecimals,
-          token: vaultData.token,
+          token: vaultData.symbol,
           transactionConfirmationTimeout:
-            vaultData.transactionConfirmationTimeout,
+            vaultData.evm.transactionConfirmationTimeout,
         }
       : undefined,
   });
@@ -123,12 +126,12 @@ export default function VaultPage({ params }: { params: { id: string } }) {
               <p>
                 Vault Address:{" "}
                 <a
-                  href={`https://etherscan.io/address/${vaultData.vaultProxyAddress}`}
+                  href={`${vaultData.evm.explorerUrl}/address/${vaultData.evm.vaultProxyAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  {vaultData.vaultProxyAddress}
+                  {vaultData.evm.vaultProxyAddress}
                 </a>
               </p>
               <p className="mt-2">{vaultData.copy.description}</p>
@@ -178,8 +181,8 @@ export default function VaultPage({ params }: { params: { id: string } }) {
         {/*shows when user has a pending withdrawal */}
         {isConnected && withdrawRequest && (
           <WithdrawInProgress
+            vaultData={vaultData}
             withdrawRequest={withdrawRequest}
-            copy={vaultData?.copy.withdrawInProgress}
           />
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -197,7 +200,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
                 title: "Deposit successful",
                 description: toastDescription,
                 type: "success",
-                txHash: hash,
+                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
               });
               refetchVaultContract();
               ethBalance.refetch();
@@ -221,7 +224,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
                 title: "Withdraw submitted",
                 description: "Assets will be sent to your Neutron account.",
                 type: "success",
-                txHash: hash,
+                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
               });
               ethBalance.refetch();
               refetchVaultContract();

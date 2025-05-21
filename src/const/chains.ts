@@ -442,3 +442,5 @@ export const getChainInfo = (chainId: string) => {
   if (!chain) return undefined;
   return chain;
 };
+
+export const defaultChainId = "neutron-1";

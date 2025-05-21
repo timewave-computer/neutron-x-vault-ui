@@ -9,7 +9,7 @@ interface ToastContextProps {
     title: string;
     description?: string;
     type: ToastType;
-    txHash?: string;
+    txUrl?: string;
     duration?: number;
   }) => void;
 }
@@ -19,7 +19,7 @@ interface ToastItem {
   title: string;
   description?: string;
   type: ToastType;
-  txHash?: string;
+  txUrl?: string;
   duration?: number;
 }
 
@@ -69,7 +69,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
               title={toast.title}
               description={toast.description}
               type={toast.type}
-              txHash={toast.txHash}
+              txUrl={toast.txUrl}
               duration={toast.duration}
               onClose={closeToast}
             />

@@ -1,22 +1,13 @@
+"use client";
 import { useState } from "react";
 import { Button, Input, Card } from "@/components";
-import { handleNumberInput, isValidNumberInput } from "@/lib";
+import { handleNumberInput } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
+import { AllVaultData } from "@/hooks";
 
 interface VaultDepositProps {
-  vaultData: {
-    vaultProxyAddress: string;
-    tokenAddress: string;
-    token: string;
-    copy: {
-      deposit: {
-        title: string;
-        description: string;
-        cta: string;
-      };
-    };
-  };
+  vaultData: AllVaultData;
   userTokenBalance: string | undefined;
   isConnected: boolean;
   previewDeposit: (amount: string) => Promise<string>;
@@ -38,13 +29,13 @@ export const VaultDeposit = ({
 
   const { data: previewDepositAmount } = useQuery({
     enabled:
-      !!vaultData?.vaultProxyAddress &&
+      !!vaultData?.evm.vaultProxyAddress &&
       parseFloat(depositInput) > 0 &&
       isConnected,
     staleTime: 0,
     queryKey: [
       QUERY_KEYS.VAULT_PREVIEW_DEPOSIT,
-      vaultData?.vaultProxyAddress,
+      vaultData?.evm.vaultProxyAddress,
       depositInput,
     ],
     queryFn: () => {
@@ -91,7 +82,7 @@ export const VaultDeposit = ({
           </p>
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">
-              Available: {`${userTokenBalance} ${vaultData.token}`}
+              Available: {`${userTokenBalance} ${vaultData.symbol}`}
             </p>
             <Button
               onClick={() => setDepositInput(userTokenBalance ?? "0")}
@@ -111,7 +102,7 @@ export const VaultDeposit = ({
           type="number"
           id="depositInput"
           name="depositInput"
-          aria-label={`Deposit amount in ${vaultData.token}`}
+          aria-label={`Deposit amount in ${vaultData.symbol}`}
           placeholder="0.0"
           min="0"
           step="any"
@@ -128,7 +119,7 @@ export const VaultDeposit = ({
         />
 
         <div className="flex items-center bg-primary-light px-4 text-base text-black border-l-2 border-primary/40 rounded-r-lg">
-          {vaultData.token}
+          {vaultData.symbol}
         </div>
       </div>
 
@@ -157,7 +148,7 @@ export const VaultDeposit = ({
           userTokenBalance &&
           parseFloat(depositInput) > parseFloat(userTokenBalance) && (
             <p className="text-sm text-secondary">
-              Insufficient {vaultData.token} balance
+              Insufficient {vaultData.symbol} balance
             </p>
           )}
       </div>

@@ -1,42 +1,44 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Card, TimelineAnimation } from "@/components";
-import { WithdrawRequest } from "@/hooks";
+import { AllVaultData, WithdrawRequest } from "@/hooks";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
 import { shortenAddress } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
 
 interface WithdrawInProgressProps {
-  copy: {
-    title: string;
-    description: string;
-    cta: string;
-  };
+  vaultData: AllVaultData;
   withdrawRequest?: WithdrawRequest;
 }
 
 const NTRN_DECIMALS = 6;
 
 export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
-  copy,
+  vaultData,
   withdrawRequest,
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const {
+    cosmos: { chainId: cosmosChainId },
+    copy,
+  } = vaultData;
+
+  const [isCompleted, setIsCompleted] = useState(false);
+
   const { data: neutronClient } = useStargateClient({
-    chainId: "neutron-1",
+    chainId: cosmosChainId,
   });
 
   useEffect(() => {
     // temporary to simulate the success of the transfer.
-    if (currentStep === 0) {
+    if (!isCompleted) {
       const timer = setInterval(() => {
-        setCurrentStep((prevStep) => (prevStep < 1 ? prevStep + 1 : prevStep));
+        setIsCompleted(true);
       }, 5000);
 
       return () => clearInterval(timer);
     }
-  }, [currentStep]);
+  }, [isCompleted, setIsCompleted]);
 
   const { data: neutronAccountBalance } = useQuery({
     queryKey: [
@@ -70,13 +72,19 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
         <div className="py-4">
           <div className="flex flex-col px-4 max-w-[1200px]">
             <div className="text-xl font-beast text-accent-purple mb-2">
-              {copy.title}
+              {isCompleted
+                ? copy.withdrawCompleted.title
+                : copy.withdrawInProgress.title}
             </div>
             <div>
               <div className="space-y-1">
-                <p>{copy.description}</p>
                 <p>
-                  Withdrawing {convertedAssetAmount} LBTC to{" "}
+                  {isCompleted
+                    ? copy.withdrawCompleted.description
+                    : copy.withdrawInProgress.description}
+                </p>
+                <p>
+                  Withdrawing {convertedAssetAmount} {vaultData.symbol} to{" "}
                   {shortenAddress(neutronRecieverAddress)}.
                 </p>
               </div>
@@ -86,8 +94,8 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
               {/* col 1 */}
               <div className="flex flex-col w-full items-center pb-2">
                 <TimelineAnimation
-                  currentStep={currentStep}
-                  steps={[`Astroport Supervault`, `Neutron Account`]}
+                  currentStep={isCompleted ? 1 : 0}
+                  steps={copy.withdrawInProgress.steps}
                 ></TimelineAnimation>
               </div>
 
@@ -99,10 +107,10 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                   </div>
                   <div className="text-3xl font-beast text-accent-purple">
                     {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
-                    LBTC
+                    {vaultData.symbol}
                   </div>
                   <a
-                    href={`https://neutron.celat.one/neutron-1/accounts/${neutronRecieverAddress}`}
+                    href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronRecieverAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline text-sm font-light text-gray-400 mb-1"

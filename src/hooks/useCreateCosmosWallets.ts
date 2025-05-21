@@ -2,7 +2,10 @@ import { useCallback } from "react";
 import { ChainType, MinimalWallet } from "@/types/wallet";
 import { WalletType, getWallet, connect, useDisconnect } from "graz";
 import { walletInfo } from "@/const/graz";
-import { getChainInfo } from "@/const/chains";
+import {
+  getChainInfo,
+  defaultChainId as defaultCosmosChainId,
+} from "@/const/chains";
 
 export const useCreateCosmosWallets = () => {
   const { disconnectAsync } = useDisconnect();
@@ -15,7 +18,7 @@ export const useCreateCosmosWallets = () => {
       const walletInfo = getCosmosWalletInfo(walletType);
 
       const connectWallet = async ({
-        chainIdToConnect = "neutron-1",
+        chainIdToConnect = defaultCosmosChainId,
       }: {
         chainIdToConnect?: string;
       }) => {

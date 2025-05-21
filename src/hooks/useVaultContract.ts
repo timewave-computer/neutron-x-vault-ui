@@ -280,56 +280,56 @@ export function useVaultContract(
       });
       return "0xplaceholder";
 
-      const parsedShares = parseUnits(shares, Number(shareDecimals));
+      // const parsedShares = parseUnits(shares, Number(shareDecimals));
 
       // approve the vault to spend vault shares (shares owned by user)
-      const { request: approveRequest } = await publicClient.simulateContract({
-        address: vaultProxyAddress as Address,
-        account: address,
-        abi: valenceVaultABI,
-        functionName: "approve",
-        args: [vaultProxyAddress as Address, parsedShares],
-      });
+      // const { request: approveRequest } = await publicClient.simulateContract({
+      //   address: vaultProxyAddress as Address,
+      //   account: address,
+      //   abi: valenceVaultABI,
+      //   functionName: "approve",
+      //   args: [vaultProxyAddress as Address, parsedShares],
+      // });
 
-      const approveHash = await walletClient.writeContract(approveRequest);
+      // const approveHash = await walletClient.writeContract(approveRequest);
 
-      // wait for approval to be mined
-      await publicClient.waitForTransactionReceipt({
-        hash: approveHash,
-        timeout: transactionConfirmationTimeout,
-      });
+      // // wait for approval to be mined
+      // await publicClient.waitForTransactionReceipt({
+      //   hash: approveHash,
+      //   timeout: transactionConfirmationTimeout,
+      // });
 
-      // redeem shares for tokens
-      const { request: redeemRequest } = await publicClient.simulateContract({
-        account: address,
-        address: vaultProxyAddress as Address,
-        abi: valenceVaultABI,
-        functionName: "redeem",
-        args: [
-          parsedShares,
-          address,
-          address,
-          maxLossBps,
-          allowSolverCompletion,
-        ],
-      });
+      // // redeem shares for tokens
+      // const { request: redeemRequest } = await publicClient.simulateContract({
+      //   account: address,
+      //   address: vaultProxyAddress as Address,
+      //   abi: valenceVaultABI,
+      //   functionName: "redeem",
+      //   args: [
+      //     parsedShares,
+      //     address,
+      //     address,
+      //     maxLossBps,
+      //     allowSolverCompletion,
+      //   ],
+      // });
 
-      const redeemHash = await walletClient.writeContract(redeemRequest);
+      // const redeemHash = await walletClient.writeContract(redeemRequest);
 
-      // Wait for withdrawal to be mined
-      const withdrawalReceipt = await publicClient.waitForTransactionReceipt({
-        hash: redeemHash,
-        timeout: transactionConfirmationTimeout,
-      });
+      // // Wait for withdrawal to be mined
+      // const withdrawalReceipt = await publicClient.waitForTransactionReceipt({
+      //   hash: redeemHash,
+      //   timeout: transactionConfirmationTimeout,
+      // });
 
-      if (withdrawalReceipt.status !== "success") {
-        console.error("Transaction reciept:", withdrawalReceipt);
-        throw new Error(
-          `Transaction reciept status: ${withdrawalReceipt.status}`,
-        );
-      }
+      // if (withdrawalReceipt.status !== "success") {
+      //   console.error("Transaction reciept:", withdrawalReceipt);
+      //   throw new Error(
+      //     `Transaction reciept status: ${withdrawalReceipt.status}`,
+      //   );
+      // }
 
-      return redeemHash;
+      // return redeemHash;
     } catch (error) {
       handleAndThrowError(error, "Withdraw failed");
     }

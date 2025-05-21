@@ -11,6 +11,7 @@ export interface ToastProps {
   txHash?: string;
   onClose: (id: string) => void;
   duration?: number;
+  txUrl?: string;
 }
 
 const getBgColorByType = (type: ToastType) => {
@@ -33,6 +34,7 @@ export const Toast: React.FC<ToastProps> = ({
   txHash,
   onClose,
   duration = 10000,
+  txUrl,
 }) => {
   // Auto close toast after duration
   useEffect(() => {
@@ -57,9 +59,9 @@ export const Toast: React.FC<ToastProps> = ({
         {description && (
           <div className="text-base text-gray-700 mt-1">{description}</div>
         )}
-        {txHash && (
+        {txUrl && (
           <a
-            href={`https://etherscan.io/tx/${txHash}`}
+            href={txUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-accent-purple hover:underline mt-2 inline-block"

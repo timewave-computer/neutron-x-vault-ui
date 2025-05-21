@@ -1,23 +1,15 @@
+"use client";
 import { useState } from "react";
 import { Button, Input, Card } from "@/components";
 import { handleNumberInput, shortenAddress } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { useAccounts } from "@/hooks";
+import { useAccounts, AllVaultData } from "@/hooks";
 import { useWalletModal } from "@/context";
+import { getChainInfo } from "@/const/chains";
 
 interface VaultWithdrawProps {
-  vaultData: {
-    vaultProxyAddress: string;
-    token: string;
-    copy: {
-      withdraw: {
-        title: string;
-        description: string;
-        cta: string;
-      };
-    };
-  };
+  vaultData: AllVaultData;
   maxRedeemableShares: string | undefined;
   previewRedeem: (amount: string) => Promise<string>;
   withdrawShares: ({
@@ -49,19 +41,22 @@ export const VaultWithdraw = ({
   const { isConnected, isCosmosConnected, isEvmConnected, cosmosAccounts } =
     useAccounts();
 
-  const cosmosAddress = cosmosAccounts?.find(
-    (account) => account.chainId === "neutron-1",
+  const cosmosChainId = vaultData.cosmos.chainId;
+  const userCosmosAddress = cosmosAccounts?.find(
+    (account) => account.chainId === cosmosChainId,
   )?.address;
+  const cosmosChainInfo = getChainInfo(cosmosChainId);
+  const cosmosChainName = cosmosChainInfo?.chainName;
 
   const { data: previewRedeemAmount } = useQuery({
     enabled:
-      !!vaultData?.vaultProxyAddress &&
+      !!vaultData?.evm.vaultProxyAddress &&
       parseFloat(withdrawInput) > 0 &&
       isConnected,
     staleTime: 0,
     queryKey: [
       QUERY_KEYS.VAULT_PREVIEW_WITHDRAW,
-      vaultData?.vaultProxyAddress,
+      vaultData?.evm.vaultProxyAddress,
       withdrawInput,
     ],
     queryFn: () => {
@@ -158,19 +153,19 @@ export const VaultWithdraw = ({
         </Button>
       ) : (
         <>
-          {!isCosmosConnected || !cosmosAddress ? (
+          {!isCosmosConnected || !userCosmosAddress ? (
             <Button
               disabled={isDisabled}
               onClick={openModal}
               className="mt-4"
               fullWidth
             >
-              Connect to Neutron
+              Connect to {cosmosChainName}
             </Button>
           ) : (
             <Button
               className="mt-4"
-              onClick={() => handleWithdraw(cosmosAddress)}
+              onClick={() => handleWithdraw(userCosmosAddress)}
               disabled={isDisabled}
               variant="primary"
               fullWidth
@@ -190,8 +185,10 @@ export const VaultWithdraw = ({
           parseFloat(withdrawInput) > 0 &&
           previewRedeemAmount && (
             <p className="text-sm text-gray-500">
-              ≈ {previewRedeemAmount} {vaultData.token}{" "}
-              {cosmosAddress ? "to " + shortenAddress(cosmosAddress) : ""}
+              ≈ {previewRedeemAmount} {vaultData.symbol}{" "}
+              {userCosmosAddress
+                ? "to " + shortenAddress(userCosmosAddress)
+                : ""}
             </p>
           )}
         {isConnected &&

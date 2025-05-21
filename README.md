@@ -12,17 +12,10 @@ A simple web application for interacting with ERC-4626 vault contracts on Ethere
 cp .env.example .env
 ```
 
-2. Add `vaults.config.json` file
-   Copy `example.vaults.config.json` and rename the file.
-
-This file tells the UI which contracts to read. The repo is set up to not commit the config. For development you can save the file locally, and for deployment you can fetch from a private github repository.
-
-To opt out of this, by delete the `fetch-remote-config` and `build-with-remote` npm scripts. Then, simply commit the config file and use the `build` command for deployment.
-
-Create reown project and wallet connect project and add. You can opt-in to use the optional ones later.
+2. Customize `vaults.config.json` file
+   This file tells the UI which contracts to read. The repo is set up to not commit the config.
 
 3. start server
-   NOTE: MAKE SURE YOU DID STEP #2 and created a `vaults.config.json`.
 
 ```bash
 nix develop
@@ -36,35 +29,59 @@ npm run start
    - Chain ID: 31337
    - Currency Symbol: ETH
 
-## Deployment
-
-1. deploy with local vaults config (have to remove file from .gitignore)
-
-```bash
-npm run build
-```
-
-2. deploy with remotely saved vaults config
-   The included script will fetch the json file from a private github repository.
-
-```bash
-npm run build-with-remote
-```
+````
 
 ## About `vaults.config.json`
 
 The `vaults.config.json` file contains an array of vault configurations. Each vault object has the following fields:
 
-- `chainId`: The ID of the blockchain network where the vault is deployed (e.g., 31337 for local testnet, 1 for Ethereum mainnet)
 - `vaultId`: A unique identifier for the vault used internally by the application
-- `vaultAddress`: The Ethereum address of the vault contract
-- `vaultProxyAddress`: The address of the proxy contract if the vault uses upgradeable contracts
-- `tokenAddress`: The address of the ERC-20 token that the vault accepts as deposits
-- `transactionConfirmationTimeout`: Maximum time (in milliseconds) to wait for transaction confirmations
-- `startBlock`: The block number from which to start scanning for vault events
-- `name`: Human-readable name of the vault
-- `description`: A brief description of the vault's purpose and strategy
-- `token`: The symbol of the token accepted by the vault (e.g., "USDC", "ETH")
+- `symbol`: The symbol of the token accepted by the vault (e.g., "USDC", "ETH")
+
+### EVM Configuration
+- `evm`: Configuration for the Ethereum side of the vault
+  - `chainId`: The ID of the blockchain network where the vault is deployed (e.g., 1 for Ethereum mainnet)
+  - `vaultAddress`: The Ethereum address of the vault contract
+  - `vaultProxyAddress`: The address of the proxy contract if the vault uses upgradeable contracts
+  - `tokenAddress`: The address of the ERC-20 token that the vault accepts as deposits
+  - `transactionConfirmationTimeout`: Maximum time (in milliseconds) to wait for transaction confirmations
+  - `startBlock`: The block number from which to start scanning for vault events
+  - `explorerUrl`: URL for the blockchain explorer (e.g., "https://etherscan.io")
+
+### Cosmos Configuration
+- `cosmos`: Configuration for the Cosmos side of the vault
+  - `chainId`: The ID of the Cosmos chain (e.g., "neutron-1")
+  - `explorerUrl`: URL for the Cosmos chain explorer
+  - `token`: Token configuration
+    - `denom`: The denomination of the token on the Cosmos chain
+    - `decimals`: Number of decimal places for the token
+  - `startBlock`: The block number from which to start scanning for vault events
+
+### UI Copy Configuration
+- `copy`: Text content for the UI
+  - `name`: Human-readable name of the vault
+  - `description`: A brief description of the vault's purpose
+  - `deposit`: Deposit-related text
+    - `title`: Title for the deposit section
+    - `description`: Description of the deposit process
+    - `cta`: Call-to-action text for deposit button
+  - `depositInProgress`: Text for deposit in progress state
+    - `title`: Title for the progress section
+    - `steps`: Array of step descriptions
+    - `description`: Description of the ongoing process
+  - `withdraw`: Withdrawal-related text
+    - `title`: Title for the withdrawal section
+    - `description`: Description of the withdrawal process
+    - `cta`: Call-to-action text for withdrawal button
+  - `withdrawInProgress`: Text for withdrawal in progress state
+    - `title`: Title for the progress section
+    - `steps`: Array of step descriptions
+    - `description`: Description of the ongoing process
+  - `withdrawCompleted`: Text for completed withdrawal state
+    - `title`: Title for the completion section
+    - `description`: Description of the completed process
+
+### APR Configuration
 - `aprRequest`: Configuration for fetching the vault's APR (Annual Percentage Rate)
   - `type`: The source type for APR data ("api" or "contract")
   - For API requests:
@@ -77,7 +94,6 @@ The `vaults.config.json` file contains an array of vault configurations. Each va
     - `abi`: Contract ABI array
     - `functionName`: Name of the function to call
     - `args`: Optional arguments for the function call
-    - NOTE: this is supported but not tested in production
 
 ## Deprecated npm scripts
 
@@ -91,9 +107,9 @@ start-anvil, manage-key, deploy-vaults, faucet are deprecated. They are for use 
 
    ```bash
    nix develop
-   ```
+````
 
-   This will automatically install all dependencies and set up your development environment.
+This will automatically install all dependencies and set up your development environment.
 
 2. Start the local Anvil node (Ethereum testnet):
 
