@@ -1,6 +1,35 @@
 import { CreateConfigParameters, createConfig, http } from "wagmi";
-import { networks } from "@/config";
 import { createClient } from "viem";
+
+/***
+ * Config Wagmi & AppKit support
+ */
+
+// default to simulation env if no account connected
+export const defaultChainId = 31337;
+
+// Get Anvil RPC URL from environment variables
+const anvilRpcUrl = process.env.NEXT_PUBLIC_ANVIL_RPC_URL as string;
+if (!anvilRpcUrl) {
+  throw new Error("NEXT_PUBLIC_ANVIL_RPC_URL is not set");
+}
+
+export const anvilNetwork = {
+  // If testnet RPC URL is provided, add Anvil network
+  id: 31337,
+  testnet: true,
+  name: "Anvil",
+  nativeCurrency: {
+    name: "Ethereum",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: { http: [anvilRpcUrl] },
+  },
+};
+
+export const networks = [anvilNetwork];
 
 type WagmiChainParameters = CreateConfigParameters["chains"];
 
