@@ -12,6 +12,6 @@ export * from "./Tooltip";
 export * from "./WithdrawInProgress";
 export * from "./DepositInProgress";
 export * from "./Background";
-export * from "./WalletModal";
+export * from "./ConnectWalletModal";
 export * from "./VaultDeposit";
 export * from "./VaultWithdraw";

@@ -1,4 +1,4 @@
-import { ChainType } from "@/types/wallet";
+import { ChainType } from "@/const";
 import { useAccount as useCosmosAccount } from "graz";
 import { useCallback, useMemo } from "react";
 import { useAccount as useEvmAccount } from "wagmi";

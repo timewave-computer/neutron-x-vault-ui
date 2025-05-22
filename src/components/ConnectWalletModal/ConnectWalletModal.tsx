@@ -1,11 +1,12 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
 import { useAccounts, useWalletList } from "@/hooks";
-import { ChainType, MinimalWallet } from "@/types/wallet";
 import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
+import { ChainType } from "@/const";
+import { MinimalWallet } from "@/state";
 import { getChainInfo } from "graz";
 
-export function WalletModal() {
+export function ConnectWalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
@@ -31,16 +32,22 @@ export function WalletModal() {
     const walletsForChainType = wallets.filter(
       (w) => w.walletChainType === chainType,
     );
-    const connectedWalletForChainType = walletsForChainType.find((w) =>
-      checkIsConnected(w.walletChainType),
-    );
+
+    console.log("walletsForChainType", chainType, walletsForChainType);
+    const connectedWalletForChainType = walletsForChainType.find(async (w) => {
+      console.log("w", w, await w.getAddress());
+      return checkIsConnected(w.walletChainType);
+    });
 
     const walletsToRender = connectedWalletForChainType
       ? [connectedWalletForChainType]
       : walletsForChainType;
 
+    console.log("walletsToRender", walletsToRender);
+
     return walletsToRender.map((wallet) => {
       if (checkIsConnected(wallet.walletChainType)) {
+        console.log("is connected", wallet);
         if (wallet.walletChainType === ChainType.Evm) {
           const address = evmAccount.address;
           const chainName = evmAccount.chain?.name;

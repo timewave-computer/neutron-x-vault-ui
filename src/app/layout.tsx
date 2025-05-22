@@ -3,7 +3,7 @@ import { Header, Footer, MobileDetection, Background } from "@/components";
 import {
   VaultsConfigProvider,
   ToastProvider,
-  WalletModalProvider,
+  ConnectWalletModalProvider,
 } from "@/context";
 import { Recursive } from "next/font/google";
 import { readVaultsConfig } from "@/lib";
@@ -64,9 +64,9 @@ export default async function RootLayout({
       >
         {/* Background pattern - positioned at the bottom-most layer */}
         <Background />
-        {/* ReactQueryProviders must be outside WalletModalProvider (expected by GrazProvider) */}
+        {/* ReactQueryProviders must be outside ConnectWalletModalProvider (expected by GrazProvider) */}
         <ReactQueryProviders>
-          <WalletModalProvider>
+          <ConnectWalletModalProvider>
             <VaultsConfigProvider vaultsConfig={vaultsConfig}>
               <MobileDetection>
                 <ToastProvider>
@@ -82,7 +82,7 @@ export default async function RootLayout({
                 </ToastProvider>
               </MobileDetection>
             </VaultsConfigProvider>
-          </WalletModalProvider>
+          </ConnectWalletModalProvider>
         </ReactQueryProviders>
       </body>
     </html>

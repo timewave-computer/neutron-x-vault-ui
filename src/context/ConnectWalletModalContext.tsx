@@ -4,37 +4,45 @@ import { GrazProvider } from "graz";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 
-interface WalletModalContextType {
+interface ConnectWalletModalContextType {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
 }
 
-const WalletModalContext = createContext<WalletModalContextType | undefined>(
-  undefined,
-);
+const ConnectWalletModalContext = createContext<
+  ConnectWalletModalContextType | undefined
+>(undefined);
 
-export function WalletModalProvider({ children }: { children: ReactNode }) {
+export function ConnectWalletModalProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
   return (
-    <WalletModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+    <ConnectWalletModalContext.Provider
+      value={{ isOpen, openModal, closeModal }}
+    >
       {/* EVM */}
       <WagmiProvider config={wagmiConfig}>
         {/* Cosmos */}
         <GrazProvider grazOptions={grazOptions}>{children}</GrazProvider>
       </WagmiProvider>
-    </WalletModalContext.Provider>
+    </ConnectWalletModalContext.Provider>
   );
 }
 
 export function useWalletModal() {
-  const context = useContext(WalletModalContext);
+  const context = useContext(ConnectWalletModalContext);
   if (context === undefined) {
-    throw new Error("useWalletModal must be used within a WalletModalProvider");
+    throw new Error(
+      "useWalletModal must be used within a ConnectWalletModalProvider",
+    );
   }
   return context;
 }

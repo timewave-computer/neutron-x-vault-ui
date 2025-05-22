@@ -1,4 +1,4 @@
-import { WalletModal } from "@/components";
+import { ConnectWalletModal } from "@/components";
 import { useWalletModal } from "@/context";
 import { useAccounts } from "@/hooks";
 import { cn } from "@/lib";
@@ -21,7 +21,7 @@ export function ConnectButton() {
         {isConnected ? "Wallets" : "Connect Wallet"}
       </button>
 
-      <WalletModal />
+      <ConnectWalletModal />
     </>
   );
 }
