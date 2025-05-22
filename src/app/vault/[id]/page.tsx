@@ -33,9 +33,10 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     address: evmAddress,
     tokenAddresses: vaultData ? [vaultData.evm.tokenAddress] : [],
   });
-  const userTokenBalance = tokenBalances?.data?.find(
-    (token) => token?.address === vaultData?.evm.tokenAddress,
-  )?.balance;
+  const userTokenBalance =
+    tokenBalances?.data?.find(
+      (token) => token?.address === vaultData?.evm.tokenAddress,
+    )?.balance ?? 0;
 
   const {
     depositWithAmount,
