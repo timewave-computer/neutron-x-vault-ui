@@ -154,7 +154,12 @@ export const VaultWithdraw = ({
       ) : (
         <>
           {!isCosmosConnected || !userCosmosAddress ? (
-            <Button onClick={openModal} className="mt-4" fullWidth>
+            <Button
+              disabled={isWithdrawDisabled}
+              onClick={openModal}
+              className="mt-4"
+              fullWidth
+            >
               Connect to {cosmosChainName}
             </Button>
           ) : (

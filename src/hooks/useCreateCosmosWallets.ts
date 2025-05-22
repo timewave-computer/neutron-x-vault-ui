@@ -1,3 +1,4 @@
+"use client";
 import { useCallback } from "react";
 import { MinimalWallet } from "@/state";
 import { ChainType, walletInfo } from "@/const";

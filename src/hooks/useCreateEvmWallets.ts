@@ -1,3 +1,4 @@
+"use client";
 import { MinimalWallet } from "@/state";
 import { useAccount, useConnect, useConnectors } from "wagmi";
 import { useCallback } from "react";
@@ -49,8 +50,6 @@ export const useCreateEvmWallets = () => {
           }
 
           await connectAsync({ connector, chainId: Number(chainIdToConnect) });
-
-          const account = await connector.getAccounts();
 
           setEvmWallet({
             id: connector.id,

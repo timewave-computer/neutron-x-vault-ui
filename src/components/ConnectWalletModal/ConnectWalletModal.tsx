@@ -1,10 +1,12 @@
+"use client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
-import { useAccounts, useWalletList } from "@/hooks";
+import { useAccounts, useKeepWalletStateSynced, useWalletList } from "@/hooks";
 import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
 import { ChainType } from "@/const";
-import { MinimalWallet } from "@/state";
+import { evmWalletAtom, MinimalWallet } from "@/state";
 import { getChainInfo } from "graz";
+import { useAtom } from "jotai";
 
 export function ConnectWalletModal() {
   const { isOpen, closeModal } = useWalletModal();
@@ -12,6 +14,8 @@ export function ConnectWalletModal() {
   const wallets = useWalletList();
 
   const { cosmosAccounts, evmAccount, checkIsConnected } = useAccounts();
+  const [evmWallet] = useAtom(evmWalletAtom);
+  useKeepWalletStateSynced();
 
   const getSectionTitle = (chainType: ChainType): string => {
     const isConnected = checkIsConnected(chainType);
@@ -33,21 +37,23 @@ export function ConnectWalletModal() {
       (w) => w.walletChainType === chainType,
     );
 
-    console.log("walletsForChainType", chainType, walletsForChainType);
-    const connectedWalletForChainType = walletsForChainType.find(async (w) => {
-      console.log("w", w, await w.getAddress());
-      return checkIsConnected(w.walletChainType);
+    const connectedWalletForChainType = walletsForChainType.find((w) => {
+      if (w.walletChainType === ChainType.Evm) {
+        return (
+          checkIsConnected(w.walletChainType) &&
+          w.walletName === evmWallet?.walletName
+        );
+      } else {
+        return checkIsConnected(w.walletChainType) && w.walletName;
+      }
     });
 
     const walletsToRender = connectedWalletForChainType
       ? [connectedWalletForChainType]
       : walletsForChainType;
 
-    console.log("walletsToRender", walletsToRender);
-
     return walletsToRender.map((wallet) => {
       if (checkIsConnected(wallet.walletChainType)) {
-        console.log("is connected", wallet);
         if (wallet.walletChainType === ChainType.Evm) {
           const address = evmAccount.address;
           const chainName = evmAccount.chain?.name;
