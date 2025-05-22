@@ -41,8 +41,7 @@ The `vaults.config.json` file contains an array of vault configurations. Each va
 ### EVM Configuration
 - `evm`: Configuration for the Ethereum side of the vault
   - `chainId`: The ID of the blockchain network where the vault is deployed (e.g., 1 for Ethereum mainnet)
-  - `vaultAddress`: The Ethereum address of the vault contract
-  - `vaultProxyAddress`: The address of the proxy contract if the vault uses upgradeable contracts
+  - `vaultAddress`: The Ethereum proxy address of the vault contract
   - `tokenAddress`: The address of the ERC-20 token that the vault accepts as deposits
   - `transactionConfirmationTimeout`: Maximum time (in milliseconds) to wait for transaction confirmations
   - `startBlock`: The block number from which to start scanning for vault events

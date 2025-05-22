@@ -25,7 +25,7 @@ const REFRESH_INTERVAL = 5000;
 
 interface UseVaultContractProps {
   vaultMetadata?: {
-    vaultProxyAddress: `0x${string}`;
+    vaultAddress: `0x${string}`;
     tokenAddress: `0x${string}`;
     tokenDecimals: number;
     shareDecimals: number;
@@ -50,7 +50,7 @@ export function useVaultContract(
   const { vaultMetadata } = props;
 
   const {
-    vaultProxyAddress,
+    vaultAddress,
     tokenAddress,
     tokenDecimals,
     shareDecimals,
@@ -82,13 +82,13 @@ export function useVaultContract(
         // total assetss (tvl)
         abi: valenceVaultABI,
         functionName: "totalAssets",
-        address: vaultProxyAddress as Address,
+        address: vaultAddress as Address,
       },
       {
         // redemption rate
         abi: valenceVaultABI,
         functionName: "redemptionRate",
-        address: vaultProxyAddress as Address,
+        address: vaultAddress as Address,
       },
     ],
   });
@@ -106,14 +106,14 @@ export function useVaultContract(
         // balance of vault shares
         abi: valenceVaultABI,
         functionName: "balanceOf",
-        address: vaultProxyAddress as Address,
+        address: vaultAddress as Address,
         args: address ? [address] : undefined,
       },
       {
         // maximum shares redeemable
         abi: valenceVaultABI,
         functionName: "maxRedeem",
-        address: vaultProxyAddress as Address,
+        address: vaultAddress as Address,
         args: [address as Address],
       },
     ],
@@ -124,7 +124,7 @@ export function useVaultContract(
 
   // Convert user's share balance to assets
   const convertShareBalanceQuery = useConvertToAssets({
-    vaultProxyAddress: vaultProxyAddress as Address,
+    vaultAddress: vaultAddress as Address,
     shares: shareBalance,
     refetchInterval: REFRESH_INTERVAL,
     enabled: isConnected && !!address && !!shareBalance,
@@ -134,7 +134,7 @@ export function useVaultContract(
 
   // Convert withdraw shares to assets
   const convertWithdrawSharesQuery = useConvertToAssets({
-    vaultProxyAddress: vaultProxyAddress as Address,
+    vaultAddress: vaultAddress as Address,
     shares: parseUnits(
       withdrawRequest?.sharesAmount ?? "0",
       Number(shareDecimals),
@@ -159,7 +159,7 @@ export function useVaultContract(
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "previewDeposit",
-      address: vaultProxyAddress as Address,
+      address: vaultAddress as Address,
       args: [parsedAmount],
     });
 
@@ -177,7 +177,7 @@ export function useVaultContract(
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "previewRedeem",
-      address: vaultProxyAddress as Address,
+      address: vaultAddress as Address,
       args: [parsedShares],
     });
 
@@ -204,7 +204,7 @@ export function useVaultContract(
         account: address,
         abi: erc20Abi,
         functionName: "approve",
-        args: [vaultProxyAddress as Address, parsedAmount],
+        args: [vaultAddress as Address, parsedAmount],
       });
 
       const approveHash = await walletClient.writeContract(approveRequest);
@@ -217,7 +217,7 @@ export function useVaultContract(
 
       // deposit tokens into vault
       const { request: depositRequest } = await publicClient.simulateContract({
-        address: vaultProxyAddress as Address,
+        address: vaultAddress as Address,
         abi: valenceVaultABI,
         functionName: "deposit",
         args: [parsedAmount, address],
@@ -262,9 +262,50 @@ export function useVaultContract(
     // Validate share balance
     if (!shareBalance) throw new Error("No shares to withdraw");
 
-    // TODO: include neutronReceiverAddress in the withdraw request
-
     try {
+      const parsedShares = parseUnits(shares, Number(shareDecimals));
+
+      // approve the vault to spend vault shares (shares owned by user)
+      const { request: approveRequest } = await publicClient.simulateContract({
+        address: vaultAddress as Address,
+        account: address,
+        abi: valenceVaultABI,
+        functionName: "approve",
+        args: [vaultAddress as Address, parsedShares],
+      });
+
+      const approveHash = await walletClient.writeContract(approveRequest);
+
+      // wait for approval to be mined
+      await publicClient.waitForTransactionReceipt({
+        hash: approveHash,
+        timeout: transactionConfirmationTimeout,
+      });
+
+      // redeem shares for tokens
+      const { request: redeemRequest } = await publicClient.simulateContract({
+        account: address,
+        address: vaultAddress as Address,
+        abi: valenceVaultABI,
+        functionName: "redeem",
+        args: [parsedShares, neutronReceiverAddress, address],
+      });
+
+      const redeemHash = await walletClient.writeContract(redeemRequest);
+
+      // Wait for withdrawal to be mined
+      const withdrawalReceipt = await publicClient.waitForTransactionReceipt({
+        hash: redeemHash,
+        timeout: transactionConfirmationTimeout,
+      });
+
+      if (withdrawalReceipt.status !== "success") {
+        console.error("Transaction reciept:", withdrawalReceipt);
+        throw new Error(
+          `Transaction reciept status: ${withdrawalReceipt.status}`,
+        );
+      }
+
       // TEMPORARY: Return mock transaction hash until actual implementation is ready
       setWithdrawRequest({
         sharesAmount: shares,
@@ -274,60 +315,7 @@ export function useVaultContract(
         withdrawId: 0,
       });
 
-      return "0xplaceholder";
-
-      // The below is an example of the actual implementation
-
-      // const parsedShares = parseUnits(shares, Number(shareDecimals));
-
-      // approve the vault to spend vault shares (shares owned by user)
-      // const { request: approveRequest } = await publicClient.simulateContract({
-      //   address: vaultProxyAddress as Address,
-      //   account: address,
-      //   abi: valenceVaultABI,
-      //   functionName: "approve",
-      //   args: [vaultProxyAddress as Address, parsedShares],
-      // });
-
-      // const approveHash = await walletClient.writeContract(approveRequest);
-
-      // // wait for approval to be mined
-      // await publicClient.waitForTransactionReceipt({
-      //   hash: approveHash,
-      //   timeout: transactionConfirmationTimeout,
-      // });
-
-      // // redeem shares for tokens
-      // const { request: redeemRequest } = await publicClient.simulateContract({
-      //   account: address,
-      //   address: vaultProxyAddress as Address,
-      //   abi: valenceVaultABI,
-      //   functionName: "redeem",
-      //   args: [
-      //     parsedShares,
-      //     address,
-      //     address,
-      //     maxLossBps,
-      //     allowSolverCompletion,
-      //   ],
-      // });
-
-      // const redeemHash = await walletClient.writeContract(redeemRequest);
-
-      // // Wait for withdrawal to be mined
-      // const withdrawalReceipt = await publicClient.waitForTransactionReceipt({
-      //   hash: redeemHash,
-      //   timeout: transactionConfirmationTimeout,
-      // });
-
-      // if (withdrawalReceipt.status !== "success") {
-      //   console.error("Transaction reciept:", withdrawalReceipt);
-      //   throw new Error(
-      //     `Transaction reciept status: ${withdrawalReceipt.status}`,
-      //   );
-      // }
-
-      // return redeemHash;
+      return redeemHash;
     } catch (error) {
       handleAndThrowError(error, "Withdraw failed");
     }

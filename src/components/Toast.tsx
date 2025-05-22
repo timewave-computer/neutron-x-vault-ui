@@ -51,7 +51,7 @@ export const Toast: React.FC<ToastProps> = ({
     <div
       className={`${getBgColorByType(
         type,
-      )} border rounded-lg shadow-lg p-5 w-full max-w-md transition-all duration-300 ease-in-out transform translate-y-0 opacity-100 flex items-start`}
+      )} border rounded-lg shadow-lg p-5 w-full max-w-md overflow-x-scroll transition-all duration-300 ease-in-out transform translate-y-0 opacity-100 flex items-start`}
       role="alert"
     >
       <div className="flex-1">

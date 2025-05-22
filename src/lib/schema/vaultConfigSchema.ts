@@ -31,9 +31,6 @@ const evmSchema = z.object({
   vaultAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault address"),
-  vaultProxyAddress: z
-    .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault proxy address"),
   transactionConfirmationTimeout: z.number(),
   tokenAddress: z
     .string()

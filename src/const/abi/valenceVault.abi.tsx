@@ -114,8 +114,8 @@ export const valenceVaultABI = [
     outputs: [
       {
         name: "",
-        type: "uint128",
-        internalType: "uint128",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
@@ -138,105 +138,11 @@ export const valenceVaultABI = [
       },
       {
         name: "",
-        type: "uint128",
-        internalType: "uint128",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "calculatePerformanceFees",
-    inputs: [
-      {
-        name: "newRate",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "currentTotalShares",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "performanceFeeBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint128",
-        internalType: "uint128",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "calculatePlatformFees",
-    inputs: [
-      {
-        name: "newRate",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "currentTotalAssets",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "currentTotalShares",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "platformFeeBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "_lastUpdateTimestamp",
-        type: "uint64",
-        internalType: "uint64",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint128",
-        internalType: "uint128",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "completeWithdraw",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "completeWithdraws",
-    inputs: [
-      {
-        name: "owners",
-        type: "address[]",
-        internalType: "address[]",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -249,46 +155,24 @@ export const valenceVaultABI = [
         internalType: "contract BaseAccount",
       },
       {
-        name: "withdrawAccount",
-        type: "address",
-        internalType: "contract BaseAccount",
-      },
-      {
         name: "strategist",
         type: "address",
         internalType: "address",
       },
       {
-        name: "fees",
-        type: "tuple",
-        internalType: "struct ValenceVault.FeeConfig",
-        components: [
-          {
-            name: "depositFeeBps",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "platformFeeBps",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "performanceFeeBps",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "solverCompletionFee",
-            type: "uint64",
-            internalType: "uint64",
-          },
-        ],
+        name: "depositFeeBps",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      {
+        name: "depositCap",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
         name: "feeDistribution",
         type: "tuple",
-        internalType: "struct ValenceVault.FeeDistributionConfig",
+        internalType: "struct OneWayVault.FeeDistributionConfig",
         components: [
           {
             name: "strategistAccount",
@@ -306,21 +190,6 @@ export const valenceVaultABI = [
             internalType: "uint32",
           },
         ],
-      },
-      {
-        name: "depositCap",
-        type: "uint128",
-        internalType: "uint128",
-      },
-      {
-        name: "withdrawLockupPeriod",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "maxWithdrawFeeBps",
-        type: "uint32",
-        internalType: "uint32",
       },
     ],
     stateMutability: "view",
@@ -359,6 +228,19 @@ export const valenceVaultABI = [
         name: "",
         type: "uint256",
         internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "currentWithdrawRequestId",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint64",
+        internalType: "uint64",
       },
     ],
     stateMutability: "view",
@@ -407,27 +289,8 @@ export const valenceVaultABI = [
     outputs: [
       {
         name: "",
-        type: "uint128",
-        internalType: "uint128",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "hasActiveWithdraw",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "bool",
-        internalType: "bool",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
@@ -472,32 +335,6 @@ export const valenceVaultABI = [
   },
   {
     type: "function",
-    name: "lastUpdateTimestamp",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint64",
-        internalType: "uint64",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "lastUpdateTotalShares",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "maxDeposit",
     inputs: [
       {
@@ -506,19 +343,6 @@ export const valenceVaultABI = [
         internalType: "address",
       },
     ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "maxHistoricalRate",
-    inputs: [],
     outputs: [
       {
         name: "",
@@ -637,34 +461,6 @@ export const valenceVaultABI = [
   },
   {
     type: "function",
-    name: "packedValues",
-    inputs: [],
-    outputs: [
-      {
-        name: "currentUpdateId",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "nextWithdrawRequestId",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "pauser",
-        type: "bool",
-        internalType: "bool",
-      },
-      {
-        name: "paused",
-        type: "bool",
-        internalType: "bool",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "pause",
     inputs: [],
     outputs: [],
@@ -770,23 +566,13 @@ export const valenceVaultABI = [
       },
       {
         name: "receiver",
-        type: "address",
-        internalType: "address",
+        type: "string",
+        internalType: "string",
       },
       {
         name: "owner",
         type: "address",
         internalType: "address",
-      },
-      {
-        name: "maxLossBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "allowSolverCompletion",
-        type: "bool",
-        internalType: "bool",
       },
     ],
     outputs: [],
@@ -857,19 +643,6 @@ export const valenceVaultABI = [
   {
     type: "function",
     name: "totalAssets",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "totalAssetsToWithdrawNextUpdate",
     inputs: [],
     outputs: [
       {
@@ -975,16 +748,6 @@ export const valenceVaultABI = [
         type: "uint256",
         internalType: "uint256",
       },
-      {
-        name: "withdrawFeeBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "nettingAmount",
-        type: "uint256",
-        internalType: "uint256",
-      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -1001,35 +764,6 @@ export const valenceVaultABI = [
     ],
     outputs: [],
     stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "updateInfos",
-    inputs: [
-      {
-        name: "",
-        type: "uint64",
-        internalType: "uint64",
-      },
-    ],
-    outputs: [
-      {
-        name: "withdrawRate",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "timestamp",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "withdrawFee",
-        type: "uint32",
-        internalType: "uint32",
-      },
-    ],
-    stateMutability: "view",
   },
   {
     type: "function",
@@ -1051,49 +785,18 @@ export const valenceVaultABI = [
   },
   {
     type: "function",
-    name: "userWithdrawRequest",
-    inputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
+    name: "vaultState",
+    inputs: [],
     outputs: [
       {
-        name: "owner",
-        type: "address",
-        internalType: "address",
+        name: "paused",
+        type: "bool",
+        internalType: "bool",
       },
       {
-        name: "claimTime",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "maxLossBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "receiver",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "updateId",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "solverFee",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "sharesAmount",
-        type: "uint256",
-        internalType: "uint256",
+        name: "pausedByOwner",
+        type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
@@ -1109,23 +812,13 @@ export const valenceVaultABI = [
       },
       {
         name: "receiver",
-        type: "address",
-        internalType: "address",
+        type: "string",
+        internalType: "string",
       },
       {
         name: "owner",
         type: "address",
         internalType: "address",
-      },
-      {
-        name: "maxLossBps",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "allowSolverCompletion",
-        type: "bool",
-        internalType: "bool",
       },
     ],
     outputs: [],
@@ -1159,6 +852,45 @@ export const valenceVaultABI = [
       },
     ],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "withdrawRequests",
+    inputs: [
+      {
+        name: "",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
+    outputs: [
+      {
+        name: "id",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "redemptionRate",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "sharesAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "receiver",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    stateMutability: "view",
   },
   {
     type: "event",
@@ -1199,15 +931,10 @@ export const valenceVaultABI = [
         name: "newConfig",
         type: "tuple",
         indexed: false,
-        internalType: "struct ValenceVault.VaultConfig",
+        internalType: "struct OneWayVault.OneWayVaultConfig",
         components: [
           {
             name: "depositAccount",
-            type: "address",
-            internalType: "contract BaseAccount",
-          },
-          {
-            name: "withdrawAccount",
             type: "address",
             internalType: "contract BaseAccount",
           },
@@ -1217,36 +944,19 @@ export const valenceVaultABI = [
             internalType: "address",
           },
           {
-            name: "fees",
-            type: "tuple",
-            internalType: "struct ValenceVault.FeeConfig",
-            components: [
-              {
-                name: "depositFeeBps",
-                type: "uint32",
-                internalType: "uint32",
-              },
-              {
-                name: "platformFeeBps",
-                type: "uint32",
-                internalType: "uint32",
-              },
-              {
-                name: "performanceFeeBps",
-                type: "uint32",
-                internalType: "uint32",
-              },
-              {
-                name: "solverCompletionFee",
-                type: "uint64",
-                internalType: "uint64",
-              },
-            ],
+            name: "depositFeeBps",
+            type: "uint32",
+            internalType: "uint32",
+          },
+          {
+            name: "depositCap",
+            type: "uint256",
+            internalType: "uint256",
           },
           {
             name: "feeDistribution",
             type: "tuple",
-            internalType: "struct ValenceVault.FeeDistributionConfig",
+            internalType: "struct OneWayVault.FeeDistributionConfig",
             components: [
               {
                 name: "strategistAccount",
@@ -1264,21 +974,6 @@ export const valenceVaultABI = [
                 internalType: "uint32",
               },
             ],
-          },
-          {
-            name: "depositCap",
-            type: "uint128",
-            internalType: "uint128",
-          },
-          {
-            name: "withdrawLockupPeriod",
-            type: "uint64",
-            internalType: "uint64",
-          },
-          {
-            name: "maxWithdrawFeeBps",
-            type: "uint32",
-            internalType: "uint32",
           },
         ],
       },
@@ -1309,25 +1004,6 @@ export const valenceVaultABI = [
       },
       {
         name: "shares",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "DepositWithdrawNetting",
-    inputs: [
-      {
-        name: "netAmount",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "timestamp",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1368,25 +1044,6 @@ export const valenceVaultABI = [
   },
   {
     type: "event",
-    name: "FeesUpdated",
-    inputs: [
-      {
-        name: "platformFee",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "performanceFee",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
     name: "Initialized",
     inputs: [
       {
@@ -1394,19 +1051,6 @@ export const valenceVaultABI = [
         type: "uint64",
         indexed: false,
         internalType: "uint64",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "MaxHistoricalRateUpdated",
-    inputs: [
-      {
-        name: "newRate",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
       },
     ],
     anonymous: false,
@@ -1483,31 +1127,6 @@ export const valenceVaultABI = [
   },
   {
     type: "event",
-    name: "UpdateProcessed",
-    inputs: [
-      {
-        name: "updateId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "withdrawRate",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "totalAssetsToWithdraw",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
     name: "Upgraded",
     inputs: [
       {
@@ -1558,143 +1177,31 @@ export const valenceVaultABI = [
   },
   {
     type: "event",
-    name: "WithdrawCancelled",
+    name: "WithdrawRequested",
     inputs: [
+      {
+        name: "id",
+        type: "uint64",
+        indexed: true,
+        internalType: "uint64",
+      },
       {
         name: "owner",
         type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "shares",
-        type: "uint256",
         indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "currentLoss",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "maxAllowedLoss",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "WithdrawCompleted",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        indexed: true,
         internalType: "address",
       },
       {
         name: "receiver",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "assets",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "shares",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "executor",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "WithdrawCompletionSkipped",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "reason",
         type: "string",
         indexed: false,
         internalType: "string",
       },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "WithdrawFeeUpdated",
-    inputs: [
-      {
-        name: "newFee",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "WithdrawRequested",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "receiver",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
       {
         name: "shares",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
-      },
-      {
-        name: "maxLossBps",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "solverEnabled",
-        type: "bool",
-        indexed: false,
-        internalType: "bool",
-      },
-      {
-        name: "updateId",
-        type: "uint64",
-        indexed: false,
-        internalType: "uint64",
       },
     ],
     anonymous: false,
@@ -1903,149 +1410,12 @@ export const valenceVaultABI = [
   },
   {
     type: "error",
-    name: "FeeExceedsUint128",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InsufficientAllowance",
-    inputs: [
-      {
-        name: "required",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "available",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-  },
-  {
-    type: "error",
-    name: "InvalidAmount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidDepositAccount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidFeeConfiguration",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidFeeDistribution",
-    inputs: [],
-  },
-  {
-    type: "error",
     name: "InvalidInitialization",
     inputs: [],
   },
   {
     type: "error",
-    name: "InvalidMaxLoss",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidMaxWithdrawFeeBps",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidOwner",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidPlatformAccount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidRate",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidReceiver",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidSolverFee",
-    inputs: [
-      {
-        name: "sent",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "required",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-  },
-  {
-    type: "error",
-    name: "InvalidStrategist",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidStrategistAccount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidUpdateSameBlock",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidWithdrawAccount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidWithdrawFee",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidWithdrawLockupPeriod",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "NoUpdateForRequest",
-    inputs: [],
-  },
-  {
-    type: "error",
     name: "NotInitializing",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "OnlyOwnerCanUnpause",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "OnlyOwnerOrStrategistAllowed",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "OnlyStrategistAllowed",
     inputs: [],
   },
   {
@@ -2088,16 +1458,6 @@ export const valenceVaultABI = [
   },
   {
     type: "error",
-    name: "SolverFeeTransferFailed",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "SolverNotAllowed",
-    inputs: [],
-  },
-  {
-    type: "error",
     name: "UUPSUnauthorizedCallContext",
     inputs: [],
   },
@@ -2111,40 +1471,5 @@ export const valenceVaultABI = [
         internalType: "bytes32",
       },
     ],
-  },
-  {
-    type: "error",
-    name: "UnexpectedETH",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "VaultIsPaused",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "WithdrawAlreadyExists",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "WithdrawNotClaimable",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "WithdrawRequestNotFound",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "ZeroAssets",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "ZeroShares",
-    inputs: [],
   },
 ] as const;

@@ -27,27 +27,27 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
           },
           {
             abi: valenceVaultABI,
-            address: vault.evm.vaultProxyAddress,
+            address: vault.evm.vaultAddress,
             functionName: "decimals",
             args: [],
           },
           {
             // tvl
             abi: valenceVaultABI,
-            address: vault.evm.vaultProxyAddress,
+            address: vault.evm.vaultAddress,
             functionName: "totalAssets",
             args: [],
           },
           {
             // total shares
             abi: valenceVaultABI,
-            address: vault.evm.vaultProxyAddress,
+            address: vault.evm.vaultAddress,
             functionName: "totalSupply",
             args: [],
           },
           {
             abi: valenceVaultABI,
-            address: vault.evm.vaultProxyAddress,
+            address: vault.evm.vaultAddress,
             functionName: "redemptionRate",
             args: [],
           },
@@ -73,14 +73,14 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
       if (address) {
         userVaultShares = await readContract(config, {
           abi: valenceVaultABI,
-          address: vault.evm.vaultProxyAddress,
+          address: vault.evm.vaultAddress,
           functionName: "balanceOf",
           args: [address as `0x${string}`],
         });
 
         userVaultAssets = await readContract(config, {
           abi: valenceVaultABI,
-          address: vault.evm.vaultProxyAddress,
+          address: vault.evm.vaultAddress,
           functionName: "convertToAssets",
           args: [userVaultShares],
         });

@@ -32,13 +32,13 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     if (!isCompleted) {
       const timer = setInterval(() => {
         setIsCompleted(true);
-      }, 5000);
+      }, 10000);
 
       return () => clearInterval(timer);
     }
   }, [isCompleted, setIsCompleted]);
 
-  const { data: neutronAccountBalance } = useQuery({
+  const { data: neutronAccountBalance, isLoading } = useQuery({
     queryKey: [
       QUERY_KEYS.NEUTRON_ACCOUNT_BALANCE,
       withdrawRequest?.evmAddress,
@@ -104,10 +104,16 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                   <div className="text-xs text-gray-500 mb-1">
                     Real-time Balance
                   </div>
-                  <div className="text-3xl font-beast text-accent-purple">
-                    {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
-                    {vaultData.symbol}
-                  </div>
+                  {isLoading ? (
+                    <div className="text-3xl font-beast text-accent-purple animate-pulse">
+                      ...
+                    </div>
+                  ) : (
+                    <div className="text-3xl font-beast text-accent-purple">
+                      {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
+                      {vaultData.symbol}
+                    </div>
+                  )}
                   <a
                     href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronReceiverAddress}`}
                     target="_blank"

@@ -5,14 +5,14 @@ import { type Address } from "viem";
 const REFRESH_INTERVAL = 5000;
 
 interface UseConvertToAssetsProps {
-  vaultProxyAddress: Address;
+  vaultAddress: Address;
   shares: bigint | undefined;
   enabled?: boolean;
   refetchInterval?: number;
 }
 
 export function useConvertToAssets({
-  vaultProxyAddress,
+  vaultAddress,
   shares,
   enabled = true,
   refetchInterval = REFRESH_INTERVAL,
@@ -24,7 +24,7 @@ export function useConvertToAssets({
     },
     abi: valenceVaultABI,
     functionName: "convertToAssets",
-    address: vaultProxyAddress,
+    address: vaultAddress,
     args: shares ? [shares] : [BigInt(0)],
   });
 }

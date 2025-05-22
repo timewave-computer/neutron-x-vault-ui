@@ -50,13 +50,13 @@ export const VaultWithdraw = ({
 
   const { data: previewRedeemAmount } = useQuery({
     enabled:
-      !!vaultData?.evm.vaultProxyAddress &&
+      !!vaultData?.evm.vaultAddress &&
       parseFloat(withdrawInput) > 0 &&
       isConnected,
     staleTime: 0,
     queryKey: [
       QUERY_KEYS.VAULT_PREVIEW_WITHDRAW,
-      vaultData?.evm.vaultProxyAddress,
+      vaultData?.evm.vaultAddress,
       withdrawInput,
     ],
     queryFn: () => {
