@@ -29,13 +29,13 @@ export const VaultDeposit = ({
 
   const { data: previewDepositAmount } = useQuery({
     enabled:
-      !!vaultData?.evm.vaultProxyAddress &&
+      !!vaultData?.evm.vaultAddress &&
       parseFloat(depositInput) > 0 &&
       isConnected,
     staleTime: 0,
     queryKey: [
       QUERY_KEYS.VAULT_PREVIEW_DEPOSIT,
-      vaultData?.evm.vaultProxyAddress,
+      vaultData?.evm.vaultAddress,
       depositInput,
     ],
     queryFn: () => {

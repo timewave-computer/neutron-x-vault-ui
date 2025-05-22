@@ -4,10 +4,9 @@
     "symbol": "LBTC",
     "evm": {
       "chainId": 31337,
-      "vaultAddress": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-      "vaultProxyAddress": "0x9A676e781A523b5d0C0e43731313A708CB607508",
-      "transactionConfirmationTimeout": 60000,
-      "tokenAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "vaultAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "transactionConfirmationTimeout": 600000,
+      "tokenAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
       "startBlock": 0,
       "explorerUrl": "https://etherscan.io"
     },

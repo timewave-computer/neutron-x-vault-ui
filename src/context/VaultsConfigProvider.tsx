@@ -14,9 +14,8 @@ import { z } from "zod";
 type VaultConfigSchema = z.infer<typeof vaultConfigSchema>;
 
 export type VaultConfig = VaultConfigSchema & {
-  vaultAddress: Address;
   evm: {
-    vaultProxyAddress: Address;
+    vaultAddress: Address;
     tokenAddress: Address;
   };
   cosmos: {

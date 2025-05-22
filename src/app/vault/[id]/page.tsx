@@ -57,7 +57,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   } = useVaultContract({
     vaultMetadata: vaultData
       ? {
-          vaultProxyAddress: vaultData.evm.vaultProxyAddress,
+          vaultAddress: vaultData.evm.vaultAddress,
           tokenAddress: vaultData.evm.tokenAddress,
           tokenDecimals: vaultData.tokenDecimals,
           shareDecimals: vaultData.shareDecimals,
@@ -127,12 +127,12 @@ export default function VaultPage({ params }: { params: { id: string } }) {
               <p>
                 Vault Address:{" "}
                 <a
-                  href={`${vaultData.evm.explorerUrl}/address/${vaultData.evm.vaultProxyAddress}`}
+                  href={`${vaultData.evm.explorerUrl}/address/${vaultData.evm.vaultAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  {vaultData.evm.vaultProxyAddress}
+                  {vaultData.evm.vaultAddress}
                 </a>
               </p>
               <p className="mt-2">{vaultData.copy.description}</p>
