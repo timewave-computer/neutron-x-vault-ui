@@ -6,7 +6,7 @@ import { createClient } from "viem";
  */
 
 // default to simulation env if no account connected
-export const defaultChainId = 31337;
+export const defaultEvmChainId = 31337;
 
 // Get Anvil RPC URL from environment variables
 const anvilRpcUrl = process.env.NEXT_PUBLIC_ANVIL_RPC_URL as string;
@@ -29,19 +29,7 @@ export const anvilNetwork = {
   },
 };
 
-export const networks = [anvilNetwork];
-
-type WagmiChainParameters = CreateConfigParameters["chains"];
-
-const wagmiChainConfig: WagmiChainParameters = networks.map((network) => ({
-  id: network.id,
-  name: network.name,
-  nativeCurrency: network.nativeCurrency,
-  rpcUrls: {
-    default: { http: network.rpcUrls.default.http },
-  },
-  // Type requires at least 1 chain object. networks is guaranteed to always have at least mainnet, so type cast is safe
-})) as unknown as WagmiChainParameters;
+const wagmiChainConfig: CreateConfigParameters["chains"] = [anvilNetwork];
 
 // Configure Wagmi client for Ethereum interactions
 export const wagmiConfig = createConfig({

@@ -1,6 +1,5 @@
 "use client";
-import { wagmiConfig } from "@/config";
-import { allSupportedCosmosChains } from "@/const/chains";
+import { grazOptions, wagmiConfig } from "@/config";
 import { GrazProvider } from "graz";
 import { createContext, useContext, useState, ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
@@ -26,27 +25,7 @@ export function WalletModalProvider({ children }: { children: ReactNode }) {
       {/* EVM */}
       <WagmiProvider config={wagmiConfig}>
         {/* Cosmos */}
-        <GrazProvider
-          grazOptions={{
-            chains: allSupportedCosmosChains,
-            chainsConfig: {
-              "neutron-1": {
-                gas: {
-                  price: "0.005",
-                  denom: "untrn",
-                },
-              },
-              "sim-neutron-1": {
-                gas: {
-                  price: "0.005",
-                  denom: "untrn",
-                },
-              },
-            },
-          }}
-        >
-          {children}
-        </GrazProvider>
+        <GrazProvider grazOptions={grazOptions}>{children}</GrazProvider>
       </WagmiProvider>
     </WalletModalContext.Provider>
   );

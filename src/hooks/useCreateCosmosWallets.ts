@@ -2,10 +2,7 @@ import { useCallback } from "react";
 import { ChainType, MinimalWallet } from "@/types/wallet";
 import { WalletType, getWallet, connect, useDisconnect } from "graz";
 import { walletInfo } from "@/const/graz";
-import {
-  getChainInfo,
-  defaultChainId as defaultCosmosChainId,
-} from "@/const/chains";
+import { getChainInfo, defaultCosmosChainId } from "@/config";
 
 export const useCreateCosmosWallets = () => {
   const { disconnectAsync } = useDisconnect();

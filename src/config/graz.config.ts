@@ -1,5 +1,5 @@
-import { defineChainInfo } from "graz";
-import { mainnetChainsArray, testnetChainsArray, neutron } from "graz/chains";
+import { ConfigureGrazArgs, defineChainInfo } from "graz";
+import { neutron } from "graz/chains";
 const NEUTRON_SIM_TESTNET_RPC_URL =
   process.env.NEXT_PUBLIC_NEUTRON_SIM_TESTNET_RPC_URL;
 if (!NEUTRON_SIM_TESTNET_RPC_URL) {
@@ -429,12 +429,28 @@ const neutronSimTestnet = defineChainInfo({
   },
 });
 
-export const allSupportedCosmosChains = [
-  neutron,
-  neutronSimTestnet,
+export const allSupportedCosmosChains = [neutron, neutronSimTestnet];
 
-  // ...mainnetChainsArray, ...testnetChainsArray,
-];
+export const grazOptions: ConfigureGrazArgs = {
+  chains: allSupportedCosmosChains,
+  chainsConfig: {
+    "neutron-1": {
+      gas: {
+        price: "0.005",
+        denom: "untrn",
+      },
+    },
+    "sim-neutron-1": {
+      gas: {
+        price: "0.005",
+        denom: "untrn",
+      },
+    },
+  },
+};
+
+export const defaultCosmosChainId = "neutron-1";
+
 export const getChainInfo = (chainId: string) => {
   const chain = allSupportedCosmosChains.find(
     (chain) => chain.chainId === chainId,
@@ -442,5 +458,3 @@ export const getChainInfo = (chainId: string) => {
   if (!chain) return undefined;
   return chain;
 };
-
-export const defaultChainId = "neutron-1";
