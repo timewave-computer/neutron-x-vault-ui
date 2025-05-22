@@ -1,16 +1,21 @@
+"use client";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useWalletModal } from "@/context";
-import { useAccounts, useWalletList } from "@/hooks";
-import { ChainType, MinimalWallet } from "@/types/wallet";
+import { useAccounts, useKeepWalletStateSynced, useWalletList } from "@/hooks";
 import { ConnectedWalletDisplay } from "./ConnectedWalletDisplay";
+import { ChainType } from "@/const";
+import { evmWalletAtom, MinimalWallet } from "@/state";
 import { getChainInfo } from "graz";
+import { useAtom } from "jotai";
 
-export function WalletModal() {
+export function ConnectWalletModal() {
   const { isOpen, closeModal } = useWalletModal();
 
   const wallets = useWalletList();
 
   const { cosmosAccounts, evmAccount, checkIsConnected } = useAccounts();
+  const [evmWallet] = useAtom(evmWalletAtom);
+  useKeepWalletStateSynced();
 
   const getSectionTitle = (chainType: ChainType): string => {
     const isConnected = checkIsConnected(chainType);
@@ -31,9 +36,17 @@ export function WalletModal() {
     const walletsForChainType = wallets.filter(
       (w) => w.walletChainType === chainType,
     );
-    const connectedWalletForChainType = walletsForChainType.find((w) =>
-      checkIsConnected(w.walletChainType),
-    );
+
+    const connectedWalletForChainType = walletsForChainType.find((w) => {
+      if (w.walletChainType === ChainType.Evm) {
+        return (
+          checkIsConnected(w.walletChainType) &&
+          w.walletName === evmWallet?.walletName
+        );
+      } else {
+        return checkIsConnected(w.walletChainType) && w.walletName;
+      }
+    });
 
     const walletsToRender = connectedWalletForChainType
       ? [connectedWalletForChainType]

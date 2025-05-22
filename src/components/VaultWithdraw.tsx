@@ -6,7 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
 import { useAccounts, VaultSummaryData } from "@/hooks";
 import { useWalletModal } from "@/context";
-import { getChainInfo } from "@/const/chains";
+import { getChainInfo } from "@/config";
 
 interface VaultWithdrawProps {
   vaultData: VaultSummaryData;
@@ -154,7 +154,12 @@ export const VaultWithdraw = ({
       ) : (
         <>
           {!isCosmosConnected || !userCosmosAddress ? (
-            <Button onClick={openModal} className="mt-4" fullWidth>
+            <Button
+              disabled={isWithdrawDisabled}
+              onClick={openModal}
+              className="mt-4"
+              fullWidth
+            >
               Connect to {cosmosChainName}
             </Button>
           ) : (

@@ -33,9 +33,10 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     address: evmAddress,
     tokenAddresses: vaultData ? [vaultData.evm.tokenAddress] : [],
   });
-  const userTokenBalance = tokenBalances?.data?.find(
-    (token) => token?.address === vaultData?.evm.tokenAddress,
-  )?.balance;
+  const userTokenBalance =
+    tokenBalances?.data?.find(
+      (token) => token?.address === vaultData?.evm.tokenAddress,
+    )?.balance ?? 0;
 
   const {
     depositWithAmount,
@@ -188,7 +189,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VaultDeposit
             vaultData={vaultData}
-            userTokenBalance={userTokenBalance}
+            userTokenBalance={userTokenBalance.toString() ?? "0"}
             isConnected={isConnected}
             previewDeposit={previewDeposit}
             depositWithAmount={depositWithAmount}

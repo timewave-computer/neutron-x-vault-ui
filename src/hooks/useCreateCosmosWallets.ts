@@ -1,15 +1,15 @@
+"use client";
 import { useCallback } from "react";
-import { ChainType, MinimalWallet } from "@/types/wallet";
+import { MinimalWallet } from "@/state";
+import { ChainType, walletInfo } from "@/const";
 import { WalletType, getWallet, connect, useDisconnect } from "graz";
-import { walletInfo } from "@/const/graz";
-import {
-  getChainInfo,
-  defaultChainId as defaultCosmosChainId,
-} from "@/const/chains";
+import { getChainInfo, defaultCosmosChainId } from "@/config";
+import { cosmosWalletAtom } from "@/state";
+import { useAtom } from "jotai";
 
 export const useCreateCosmosWallets = () => {
   const { disconnectAsync } = useDisconnect();
-
+  const [, setCosmosWallet] = useAtom(cosmosWalletAtom);
   const createCosmosWallets = useCallback(() => {
     const wallets: MinimalWallet[] = [];
     const cosmosWallets = getAvailableWallets();
@@ -49,7 +49,12 @@ export const useCreateCosmosWallets = () => {
           throw new Error("failed to get address from wallet");
         }
 
-        return { address };
+        setCosmosWallet({
+          id: walletType,
+          walletName: walletInfo.name,
+          chainType: ChainType.Cosmos,
+          logo: walletInfo.imgSrc,
+        });
       };
 
       const minimalWallet: MinimalWallet = {
@@ -68,10 +73,11 @@ export const useCreateCosmosWallets = () => {
           }
         })(),
         connect: async (chainId?: string) => {
-          return await connectWallet({ chainIdToConnect: chainId });
+          await connectWallet({ chainIdToConnect: chainId });
         },
         disconnect: async (chainId?: string) => {
-          return disconnectAsync({ chainId });
+          await disconnectAsync({ chainId });
+          setCosmosWallet(undefined);
         },
         getAddress: async (chainId?: string) => {
           if (!chainId) {

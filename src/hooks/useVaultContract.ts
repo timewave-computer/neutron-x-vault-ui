@@ -103,13 +103,6 @@ export function useVaultContract(
     },
     contracts: [
       {
-        // balance of underlying token
-        abi: erc20Abi,
-        functionName: "balanceOf",
-        address: tokenAddress as Address,
-        args: address ? [address] : undefined,
-      },
-      {
         // balance of vault shares
         abi: valenceVaultABI,
         functionName: "balanceOf",
@@ -126,8 +119,8 @@ export function useVaultContract(
     ],
   });
 
-  const shareBalance = userDataQuery.data?.[1]?.result;
-  const maxRedeemableShares = userDataQuery.data?.[2]?.result;
+  const shareBalance = userDataQuery.data?.[0]?.result;
+  const maxRedeemableShares = userDataQuery.data?.[1]?.result;
 
   // Convert user's share balance to assets
   const convertShareBalanceQuery = useConvertToAssets({

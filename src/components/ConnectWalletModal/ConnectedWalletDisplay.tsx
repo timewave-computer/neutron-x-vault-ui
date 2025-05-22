@@ -1,4 +1,4 @@
-import { MinimalWallet } from "@/types/wallet";
+import { MinimalWallet } from "@/state";
 import { shortenAddress } from "@/lib";
 
 export function ConnectedWalletDisplay({
