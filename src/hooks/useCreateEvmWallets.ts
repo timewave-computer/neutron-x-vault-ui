@@ -1,8 +1,11 @@
-import { ChainType, MinimalWallet } from "@/types/wallet";
+import { MinimalWallet } from "@/state";
 import { useAccount, useConnect, useConnectors } from "wagmi";
 import { useCallback } from "react";
 import { disconnect } from "@wagmi/core";
 import { wagmiConfig } from "@/config";
+import { ChainType } from "@/const";
+import { evmWalletAtom } from "@/state";
+import { useAtom } from "jotai";
 
 export const useCreateEvmWallets = () => {
   const {
@@ -12,6 +15,8 @@ export const useCreateEvmWallets = () => {
   } = useAccount();
   const { connectAsync } = useConnect();
   const connectors = useConnectors();
+
+  const [, setEvmWallet] = useAtom(evmWalletAtom);
 
   const createEvmWallets = useCallback(() => {
     const wallets: MinimalWallet[] = [];
@@ -47,7 +52,12 @@ export const useCreateEvmWallets = () => {
 
           const account = await connector.getAccounts();
 
-          return { address: account[0], logo: connector.icon };
+          setEvmWallet({
+            id: connector.id,
+            walletName: connector.name,
+            chainType: ChainType.Evm,
+            logo: connector.icon,
+          });
         } catch (e) {
           const error = e as Error;
           console.error(error);
@@ -65,10 +75,11 @@ export const useCreateEvmWallets = () => {
         },
         isAvailable: true, // available because connector exists for EVM
         connect: async (chainId?: string) => {
-          return connectWallet({ chainIdToConnect: chainId });
+          await connectWallet({ chainIdToConnect: chainId });
         },
         disconnect: async () => {
           await disconnect(wagmiConfig);
+          setEvmWallet(undefined);
         },
         getAddress: async () => {
           const account = await connector.getAccounts();
