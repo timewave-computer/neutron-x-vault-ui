@@ -4,10 +4,10 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { VaultSummaryData } from "@/hooks";
+import { VaultConfig } from "@/context";
 
 interface VaultDepositProps {
-  vaultData: VaultSummaryData;
+  vaultConfig: VaultConfig;
   userTokenBalance: string | undefined;
   isConnected: boolean;
   previewDeposit: (amount: string) => Promise<string>;
@@ -17,7 +17,7 @@ interface VaultDepositProps {
 }
 
 export const VaultDeposit = ({
-  vaultData,
+  vaultConfig,
   userTokenBalance,
   isConnected,
   previewDeposit,
@@ -25,19 +25,18 @@ export const VaultDeposit = ({
   onDepositSuccess,
   onDepositError,
 }: VaultDepositProps) => {
+  const {
+    symbol,
+    copy: { deposit: depositCopy },
+    evm: { vaultAddress },
+  } = vaultConfig;
+
   const [depositInput, setDepositInput] = useState("");
 
   const { data: previewDepositAmount } = useQuery({
-    enabled:
-      !!vaultData?.evm.vaultAddress &&
-      parseFloat(depositInput) > 0 &&
-      isConnected,
+    enabled: !!vaultAddress && parseFloat(depositInput) > 0 && isConnected,
     staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_DEPOSIT,
-      vaultData?.evm.vaultAddress,
-      depositInput,
-    ],
+    queryKey: [QUERY_KEYS.VAULT_PREVIEW_DEPOSIT, vaultAddress, depositInput],
     queryFn: () => {
       return previewDeposit(depositInput);
     },
@@ -45,7 +44,7 @@ export const VaultDeposit = ({
 
   const { mutate: handleDeposit, isPending: isDepositing } = useMutation({
     mutationFn: async () => {
-      if (!depositInput || !isConnected || !vaultData)
+      if (!depositInput || !isConnected || !vaultConfig)
         throw new Error("Unable to initiate deposit");
       const result = await depositWithAmount(depositInput);
       if (!result) throw new Error("Transaction failed");
@@ -74,15 +73,13 @@ export const VaultDeposit = ({
     <Card variant="primary">
       <div className="mb-6">
         <h3 className="text-lg font-beast text-accent-purple">
-          {vaultData.copy.deposit.title}
+          {depositCopy.title}
         </h3>
         <div className="flex justify-between items-center mt-2">
-          <p className="text-sm text-gray-500">
-            {vaultData.copy.deposit.description}
-          </p>
+          <p className="text-sm text-gray-500">{depositCopy.description}</p>
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">
-              Available: {`${userTokenBalance} ${vaultData.symbol}`}
+              Available: {`${userTokenBalance} ${symbol}`}
             </p>
             <Button
               onClick={() => setDepositInput(userTokenBalance ?? "0")}
@@ -102,7 +99,7 @@ export const VaultDeposit = ({
           type="number"
           id="depositInput"
           name="depositInput"
-          aria-label={`Deposit amount in ${vaultData.symbol}`}
+          aria-label={`Deposit amount in ${symbol}`}
           placeholder="0.0"
           min="0"
           step="any"
@@ -119,7 +116,7 @@ export const VaultDeposit = ({
         />
 
         <div className="flex items-center bg-primary-light px-4 text-base text-black border-l-2 border-primary/40 rounded-r-lg">
-          {vaultData.symbol}
+          {symbol}
         </div>
       </div>
 
@@ -131,7 +128,7 @@ export const VaultDeposit = ({
         fullWidth
         isLoading={isDepositing}
       >
-        {isDepositing ? "Confirm in Wallet..." : vaultData.copy.deposit.cta}
+        {isDepositing ? "Confirm in Wallet..." : depositCopy.cta}
       </Button>
 
       {/* Deposit estimate and warning display */}
@@ -148,7 +145,7 @@ export const VaultDeposit = ({
           userTokenBalance &&
           parseFloat(depositInput) > parseFloat(userTokenBalance) && (
             <p className="text-sm text-secondary">
-              Insufficient {vaultData.symbol} balance
+              Insufficient {symbol} balance
             </p>
           )}
       </div>
