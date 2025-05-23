@@ -1,6 +1,6 @@
 import { WalletType } from "graz";
 
-export const walletInfo: Record<
+export const cosmosWalletInfo: Record<
   string,
   {
     name: string;

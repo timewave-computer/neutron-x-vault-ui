@@ -7,11 +7,13 @@ import {
 } from "wagmi";
 import { parseUnits, erc20Abi, BaseError } from "viem";
 import { type Address } from "viem";
-import { valenceVaultABI } from "@/const";
-import { formatBigInt } from "@/lib";
+import { QUERY_KEYS, valenceVaultABI } from "@/const";
+import { fetchAprFromApi, fetchAprFromContract, formatBigInt } from "@/lib";
 import { readContract } from "@wagmi/core";
 import { useConvertToAssets, useWalletClient } from "@/hooks";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useVaultsConfig } from "@/context";
+import { useQuery } from "@tanstack/react-query";
 const REFRESH_INTERVAL = 5000;
 
 /**
@@ -23,17 +25,6 @@ const REFRESH_INTERVAL = 5000;
  * - Viewing pending withdrawals
  */
 
-interface UseVaultContractProps {
-  vaultMetadata?: {
-    vaultAddress: `0x${string}`;
-    tokenAddress: `0x${string}`;
-    tokenDecimals: number;
-    shareDecimals: number;
-    transactionConfirmationTimeout: number;
-    token: string;
-  };
-}
-
 // temporary
 export interface WithdrawRequest {
   sharesAmount: string;
@@ -44,24 +35,22 @@ export interface WithdrawRequest {
   redemptionRate: bigint;
 }
 
-export function useVaultContract(
-  props: UseVaultContractProps,
-): UseVaultContractReturnValue {
-  const { vaultMetadata } = props;
+export function useVaultContract({
+  vaultId,
+}: {
+  vaultId: string;
+}): UseVaultContractReturnValue {
+  const { getVaultConfig } = useVaultsConfig();
 
-  const {
-    vaultAddress,
-    tokenAddress,
-    tokenDecimals,
-    shareDecimals,
-    transactionConfirmationTimeout,
-    token: symbol,
-  } = vaultMetadata ?? {
-    // placeholders
-    tokenDecimals: 6,
-    shareDecimals: 18,
-    token: "",
-  };
+  const vaultConfig = useMemo(
+    () => getVaultConfig(vaultId),
+    [vaultId, getVaultConfig],
+  );
+
+  const vaultAddress = vaultConfig?.evm.vaultAddress;
+  const tokenAddress = vaultConfig?.evm.tokenAddress;
+  const transactionConfirmationTimeout =
+    vaultConfig?.evm.transactionConfirmationTimeout;
 
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
@@ -79,6 +68,18 @@ export function useVaultContract(
     },
     contracts: [
       {
+        abi: erc20Abi,
+        address: tokenAddress,
+        functionName: "decimals",
+        args: [],
+      },
+      {
+        abi: valenceVaultABI,
+        address: vaultAddress,
+        functionName: "decimals",
+        args: [],
+      },
+      {
         // total assetss (tvl)
         abi: valenceVaultABI,
         functionName: "totalAssets",
@@ -92,9 +93,26 @@ export function useVaultContract(
       },
     ],
   });
+  const tokenDecimals = vaultMetadataQuery.data?.[0]?.result ?? 0;
+  const shareDecimals = vaultMetadataQuery.data?.[1]?.result ?? 0;
+  const tvl = vaultMetadataQuery.data?.[2]?.result;
+  const redemptionRate = vaultMetadataQuery.data?.[3]?.result;
 
-  const tvl = vaultMetadataQuery.data?.[0]?.result;
-  const redemptionRate = vaultMetadataQuery.data?.[1]?.result;
+  const aprQuery = useQuery({
+    queryFn: async () => {
+      if (!vaultConfig) throw new Error("Vault config not found");
+      let apr: string | undefined = undefined;
+      if (vaultConfig.aprRequest.type === "contract") {
+        apr = await fetchAprFromContract(vaultConfig, config, tokenDecimals);
+      } else if (vaultConfig.aprRequest.type === "api") {
+        apr = await fetchAprFromApi(vaultConfig);
+      }
+      return apr ? (parseFloat(apr) * 100).toString() : undefined;
+    },
+    queryKey: [QUERY_KEYS.VAULT_APR, vaultId],
+    enabled: !!vaultConfig,
+    refetchInterval: REFRESH_INTERVAL,
+  });
 
   const userDataQuery = useReadContracts({
     query: {
@@ -150,7 +168,7 @@ export function useVaultContract(
 
   //Preview a deposit (tokens -> vault shares)
   const previewDeposit = async (amount: string) => {
-    if (!vaultMetadata) throw new Error("Failed to preview deposit");
+    if (!shareDecimals) throw new Error("Failed to preview deposit");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
@@ -168,7 +186,7 @@ export function useVaultContract(
 
   // Preview a withdrawal (vault shares -> tokens)
   const previewRedeem = async (shares: string) => {
-    if (!vaultMetadata) throw new Error("Failed to preview redeem");
+    if (!tokenDecimals) throw new Error("Failed to preview redeem");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
@@ -190,7 +208,7 @@ export function useVaultContract(
 
   //Deposit tokens into vault
   const depositWithAmount = async (amount: string) => {
-    if (!vaultMetadata) throw new Error("Failed to initiate deposit");
+    if (!tokenDecimals) throw new Error("Failed to initiate deposit");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
@@ -254,7 +272,6 @@ export function useVaultContract(
     allowSolverCompletion?: boolean;
     neutronReceiverAddress: string;
   }) => {
-    if (!vaultMetadata) throw new Error("Failed to initiate withdraw");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
@@ -334,13 +351,15 @@ export function useVaultContract(
     vaultMetadataQuery.isLoading ||
     userDataQuery.isLoading ||
     convertWithdrawSharesQuery.isLoading ||
-    convertShareBalanceQuery.isLoading;
+    convertShareBalanceQuery.isLoading ||
+    aprQuery.isLoading;
 
   const isError =
     vaultMetadataQuery.isError ||
     userDataQuery.isError ||
     convertWithdrawSharesQuery.isError ||
-    convertShareBalanceQuery.isError;
+    convertShareBalanceQuery.isError ||
+    aprQuery.isError;
 
   return {
     isLoading,
@@ -350,14 +369,15 @@ export function useVaultContract(
     withdrawShares,
     previewDeposit,
     previewRedeem,
-    tokenDecimals,
-    shareDecimals,
+    tokenDecimals: tokenDecimals,
+    shareDecimals: shareDecimals,
     data: {
       tvl: formatBigInt(tvl, tokenDecimals),
       redemptionRate: formatBigInt(redemptionRate, shareDecimals),
       maxRedeemableShares: formatBigInt(maxRedeemableShares, shareDecimals),
       shareBalance: formatBigInt(shareBalance ?? BigInt(0), shareDecimals),
       assetBalance: formatBigInt(userAssetAmount ?? BigInt(0), tokenDecimals),
+      apr: aprQuery.data,
       withdrawRequest: withdrawRequest
         ? {
             ...withdrawRequest,
@@ -400,6 +420,7 @@ interface UseVaultContractReturnValue {
     withdrawRequest?: WithdrawRequest & {
       convertedAssetAmount: string;
     };
+    apr?: string;
   };
 }
 

@@ -4,8 +4,6 @@ export * from "./Footer";
 export * from "./Header";
 export * from "./Input";
 export * from "./MobileDetection";
-export * from "./Toggle";
-export * from "./WithdrawTimer";
 export * from "./TimelineAnimation";
 export * from "./Toast";
 export * from "./Tooltip";

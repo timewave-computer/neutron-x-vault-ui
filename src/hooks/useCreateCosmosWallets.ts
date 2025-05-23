@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
 import { MinimalWallet } from "@/state";
-import { ChainType, walletInfo } from "@/const";
+import { ChainType, cosmosWalletInfo } from "@/const";
 import { WalletType, getWallet, connect, useDisconnect } from "graz";
 import { getChainInfo, defaultCosmosChainId } from "@/config";
 import { cosmosWalletAtom } from "@/state";
@@ -107,5 +107,5 @@ const getAvailableWallets = () => {
 };
 
 export const getCosmosWalletInfo = (walletType: WalletType) => {
-  return walletInfo[walletType];
+  return cosmosWalletInfo[walletType];
 };

@@ -4,12 +4,12 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput, shortenAddress } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { useAccounts, VaultSummaryData } from "@/hooks";
-import { useWalletModal } from "@/context";
+import { useAccounts } from "@/hooks";
+import { useWalletModal, type VaultConfig } from "@/context";
 import { getChainInfo } from "@/config";
 
 interface VaultWithdrawProps {
-  vaultData: VaultSummaryData;
+  vaultConfig: VaultConfig;
   maxRedeemableShares: string | undefined;
   previewRedeem: (amount: string) => Promise<string>;
   withdrawShares: ({
@@ -28,20 +28,25 @@ interface VaultWithdrawProps {
 }
 
 export const VaultWithdraw = ({
-  vaultData,
+  vaultConfig,
   maxRedeemableShares,
   previewRedeem,
   withdrawShares,
   onWithdrawSuccess,
   onWithdrawError,
 }: VaultWithdrawProps) => {
+  const {
+    symbol,
+    cosmos: { chainId: cosmosChainId },
+    copy: { withdraw: withdrawCopy },
+    evm: { vaultAddress },
+  } = vaultConfig;
   const [withdrawInput, setWithdrawInput] = useState("");
   const { openModal } = useWalletModal();
 
   const { isConnected, isCosmosConnected, isEvmConnected, cosmosAccounts } =
     useAccounts();
 
-  const cosmosChainId = vaultData.cosmos.chainId;
   const userCosmosAddress = cosmosAccounts?.find(
     (account) => account.chainId === cosmosChainId,
   )?.address;
@@ -49,16 +54,9 @@ export const VaultWithdraw = ({
   const cosmosChainName = cosmosChainInfo?.chainName;
 
   const { data: previewRedeemAmount } = useQuery({
-    enabled:
-      !!vaultData?.evm.vaultAddress &&
-      parseFloat(withdrawInput) > 0 &&
-      isConnected,
+    enabled: !!vaultAddress && parseFloat(withdrawInput) > 0 && isConnected,
     staleTime: 0,
-    queryKey: [
-      QUERY_KEYS.VAULT_PREVIEW_WITHDRAW,
-      vaultData?.evm.vaultAddress,
-      withdrawInput,
-    ],
+    queryKey: [QUERY_KEYS.VAULT_PREVIEW_WITHDRAW, vaultAddress, withdrawInput],
     queryFn: () => {
       return previewRedeem(withdrawInput);
     },
@@ -66,7 +64,7 @@ export const VaultWithdraw = ({
 
   const { mutate: handleWithdraw, isPending: isWithdrawing } = useMutation({
     mutationFn: async (neutronReceiverAddress: string) => {
-      if (!withdrawInput || !isConnected || !vaultData)
+      if (!withdrawInput || !isConnected || !vaultConfig)
         throw new Error("Unable to initiate withdrawal");
       const result = await withdrawShares({
         shares: withdrawInput,
@@ -99,12 +97,10 @@ export const VaultWithdraw = ({
     <Card variant="primary">
       <div className="mb-6">
         <h3 className="text-lg font-beast text-accent-purple mb-1">
-          {vaultData.copy.withdraw.title}
+          {withdrawCopy.title}
         </h3>
         <div className="flex justify-between items-center mt-2">
-          <p className="text-sm text-gray-500">
-            {vaultData.copy.withdraw.description}
-          </p>
+          <p className="text-sm text-gray-500">{withdrawCopy.description}</p>
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-500">
               Available: {maxRedeemableShares} shares
@@ -149,7 +145,7 @@ export const VaultWithdraw = ({
 
       {!isEvmConnected ? (
         <Button className="mt-4" disabled={true} variant="primary" fullWidth>
-          {vaultData.copy.withdraw.cta}
+          {withdrawCopy.cta}
         </Button>
       ) : (
         <>
@@ -171,9 +167,7 @@ export const VaultWithdraw = ({
               fullWidth
               isLoading={isWithdrawing}
             >
-              {isWithdrawing
-                ? "Confirm in Wallet..."
-                : vaultData.copy.withdraw.cta}
+              {isWithdrawing ? "Confirm in Wallet..." : withdrawCopy.cta}
             </Button>
           )}
         </>
@@ -185,7 +179,7 @@ export const VaultWithdraw = ({
           parseFloat(withdrawInput) > 0 &&
           previewRedeemAmount && (
             <p className="text-sm text-gray-500">
-              ≈ {previewRedeemAmount} {vaultData.symbol}{" "}
+              ≈ {previewRedeemAmount} {symbol}{" "}
               {userCosmosAddress
                 ? "to " + shortenAddress(userCosmosAddress)
                 : ""}

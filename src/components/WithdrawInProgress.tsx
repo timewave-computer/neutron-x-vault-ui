@@ -1,25 +1,32 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Card, TimelineAnimation } from "@/components";
-import { VaultSummaryData, WithdrawRequest } from "@/hooks";
+import { WithdrawRequest } from "@/hooks";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
 import { shortenAddress, microToBase } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
+import { VaultConfig } from "@/context";
 
-interface WithdrawInProgressProps {
-  vaultData: VaultSummaryData;
-  withdrawRequest?: WithdrawRequest;
-}
-
-export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
-  vaultData,
+export const WithdrawInProgress = ({
+  vaultConfig: _vaultConfig,
   withdrawRequest,
+}: {
+  vaultConfig: VaultConfig;
+  withdrawRequest: WithdrawRequest;
 }) => {
   const {
-    cosmos: { chainId: cosmosChainId },
-    copy,
-  } = vaultData;
+    symbol,
+    cosmos: {
+      chainId: cosmosChainId,
+      explorerUrl: cosmosExplorerUrl,
+      token: { denom: cosmosTokenDenom, decimals: cosmosTokenDecimals },
+    },
+    copy: {
+      withdrawInProgress: withdrawInProgressCopy,
+      withdrawCompleted: withdrawCompletedCopy,
+    },
+  } = _vaultConfig;
 
   const [isCompleted, setIsCompleted] = useState(false);
 
@@ -49,9 +56,9 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
     queryFn: async () => {
       const balance = await neutronClient?.getBalance(
         withdrawRequest?.neutronReceiverAddress ?? "",
-        vaultData.cosmos.token.denom,
+        cosmosTokenDenom,
       );
-      return microToBase(balance?.amount ?? 0, vaultData.cosmos.token.decimals);
+      return microToBase(balance?.amount ?? 0, cosmosTokenDecimals);
     },
   });
 
@@ -71,20 +78,20 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
           <div className="flex flex-col px-4 max-w-[1200px]">
             <div className="text-xl font-beast text-accent-purple mb-2">
               {isCompleted
-                ? copy.withdrawCompleted.title
-                : copy.withdrawInProgress.title}
+                ? withdrawCompletedCopy.title
+                : withdrawInProgressCopy.title}
             </div>
             <div>
               <div className="space-y-1">
                 <p>
                   {isCompleted
-                    ? copy.withdrawCompleted.description
-                    : copy.withdrawInProgress.description}
+                    ? withdrawCompletedCopy.description
+                    : withdrawInProgressCopy.description}
                 </p>
                 <p>
                   {isCompleted
-                    ? `Withdrawal complete. ${convertedAssetAmount} ${vaultData.symbol} has been transferred to your wallet.`
-                    : `Withdrawing ${convertedAssetAmount} ${vaultData.symbol} to ${shortenAddress(neutronReceiverAddress)}.`}
+                    ? `Withdrawal complete. ${convertedAssetAmount} ${symbol} has been transferred to your wallet.`
+                    : `Withdrawing ${convertedAssetAmount} ${symbol} to ${shortenAddress(neutronReceiverAddress)}.`}
                 </p>
               </div>
             </div>
@@ -94,7 +101,7 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
               <div className="flex flex-col w-full items-center pb-2">
                 <TimelineAnimation
                   currentStep={isCompleted ? 1 : 0}
-                  steps={copy.withdrawInProgress.steps}
+                  steps={withdrawInProgressCopy.steps}
                 ></TimelineAnimation>
               </div>
 
@@ -111,11 +118,11 @@ export const WithdrawInProgress: React.FC<WithdrawInProgressProps> = ({
                   ) : (
                     <div className="text-3xl font-beast text-accent-purple">
                       {neutronAccountBalance ? neutronAccountBalance : "0.00"}{" "}
-                      {vaultData.symbol}
+                      {symbol}
                     </div>
                   )}
                   <a
-                    href={`${vaultData.cosmos.explorerUrl}/accounts/${neutronReceiverAddress}`}
+                    href={`${cosmosExplorerUrl}/accounts/${neutronReceiverAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline text-sm font-light text-gray-400 mb-1"

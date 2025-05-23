@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useViewAllVaults,
-  useVaultContract,
-  useTokenBalances,
-  useAccounts,
-} from "@/hooks";
+import { useVaultContract, useTokenBalances, useAccounts } from "@/hooks";
 import { formatNumberString } from "@/lib";
-import { useToast } from "@/context";
+import { useToast, useVaultsConfig } from "@/context";
 import {
   Card,
   WithdrawInProgress,
@@ -16,33 +11,32 @@ import {
   VaultWithdraw,
   VaultDeposit,
 } from "@/components";
+import { useMemo } from "react";
 
 export default function VaultPage({ params }: { params: { id: string } }) {
   const { isConnected, evmAccount } = useAccounts();
   const { showToast } = useToast();
   const evmAddress = evmAccount?.address;
-  const {
-    vaults,
-    isLoading: isLoadingVaults,
-    isError: isVaultsError,
-  } = useViewAllVaults();
-  const vaultData = vaults?.find((v) => v.vaultId === params.id);
-  const tokenSymbol = vaultData?.symbol ?? "";
+  const { getVaultConfig } = useVaultsConfig();
+  const vaultConfig = useMemo(
+    () => getVaultConfig(params.id),
+    [params.id, getVaultConfig],
+  );
+  const tokenSymbol = vaultConfig?.symbol ?? "";
 
   const { ethBalance, tokenBalances } = useTokenBalances({
     address: evmAddress,
-    tokenAddresses: vaultData ? [vaultData.evm.tokenAddress] : [],
+    tokenAddresses: vaultConfig ? [vaultConfig.evm.tokenAddress] : [],
   });
   const userTokenBalance =
     tokenBalances?.data?.find(
-      (token) => token?.address === vaultData?.evm.tokenAddress,
+      (token) => token?.address === vaultConfig?.evm.tokenAddress,
     )?.balance ?? 0;
 
   const {
     depositWithAmount,
     withdrawShares,
     refetch: refetchVaultContract,
-
     previewRedeem,
     previewDeposit,
     data: {
@@ -51,21 +45,12 @@ export default function VaultPage({ params }: { params: { id: string } }) {
       shareBalance: userShares,
       assetBalance: userVaultAssets,
       withdrawRequest,
+      apr,
     },
     isLoading: isLoadingContract,
     isError: isContractError,
   } = useVaultContract({
-    vaultMetadata: vaultData
-      ? {
-          vaultAddress: vaultData.evm.vaultAddress,
-          tokenAddress: vaultData.evm.tokenAddress,
-          tokenDecimals: vaultData.tokenDecimals,
-          shareDecimals: vaultData.shareDecimals,
-          token: vaultData.symbol,
-          transactionConfirmationTimeout:
-            vaultData.evm.transactionConfirmationTimeout,
-        }
-      : undefined,
+    vaultId: params.id,
   });
 
   const userSharesFormatted = formatNumberString(userShares, "shares", {
@@ -84,8 +69,8 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     displayDecimals: 2,
   });
 
-  const isLoading = isLoadingVaults || isLoadingContract;
-  const isError = isVaultsError || isContractError;
+  const isLoading = isLoadingContract;
+  const isError = isContractError;
 
   if (isLoading) {
     return (
@@ -95,7 +80,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     );
   } else if (isError) {
     return <p>Error loading vault data.</p>;
-  } else if (!vaultData) {
+  } else if (!vaultConfig) {
     return (
       <div className="text-center">
         <h1 className="text-3xl font-beast text-accent-purple sm:text-4xl">
@@ -121,21 +106,21 @@ export default function VaultPage({ params }: { params: { id: string } }) {
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-beast text-primary sm:text-4xl">
-              {vaultData.copy.name}
+              {vaultConfig.copy.name}
             </h1>
             <div className="flex flex-col gap-1 mt-1 text-base text-gray-500">
               <p>
                 Vault Address:{" "}
                 <a
-                  href={`${vaultData.evm.explorerUrl}/address/${vaultData.evm.vaultAddress}`}
+                  href={`${vaultConfig.evm.explorerUrl}/address/${vaultConfig.evm.vaultAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  {vaultData.evm.vaultAddress}
+                  {vaultConfig.evm.vaultAddress}
                 </a>
               </p>
-              <p className="mt-2">{vaultData.copy.description}</p>
+              <p className="mt-2">{vaultConfig.copy.description}</p>
             </div>
           </div>
         </div>
@@ -165,7 +150,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           <Card variant="secondary" className="text-center">
             <dt className="text-base text-black">APR</dt>
             <dd className="mt-2 text-2xl font-beast text-secondary text-wrap break-words">
-              {vaultData.aprPercentage ? `${vaultData.aprPercentage} %` : "N/A"}
+              {apr ? `${apr} %` : "N/A"}
             </dd>
           </Card>
         </dl>
@@ -176,32 +161,32 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           parseFloat(maxRedeemableShares) > 0 &&
           // contains copy for vault path and on deposit success
           !withdrawRequest && (
-            <DepositInProgress copy={vaultData.copy.depositInProgress} />
+            <DepositInProgress copy={vaultConfig.copy.depositInProgress} />
           )}
 
         {/*shows when user has a pending withdrawal */}
         {isConnected && withdrawRequest && (
           <WithdrawInProgress
-            vaultData={vaultData}
+            vaultConfig={vaultConfig}
             withdrawRequest={withdrawRequest}
           />
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VaultDeposit
-            vaultData={vaultData}
+            vaultConfig={vaultConfig}
             userTokenBalance={userTokenBalance.toString() ?? "0"}
             isConnected={isConnected}
             previewDeposit={previewDeposit}
             depositWithAmount={depositWithAmount}
             onDepositSuccess={(hash: `0x${string}`) => {
-              const toastDescription = vaultData?.aprPercentage
-                ? `Your funds are now earning ${vaultData?.aprPercentage}% APY!`
+              const toastDescription = apr
+                ? `Your funds are now earning ${apr}% APY!`
                 : "Funds are now earning yield.";
               showToast({
                 title: "Deposit successful",
                 description: toastDescription,
                 type: "success",
-                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
+                txUrl: `${vaultConfig.evm.explorerUrl}/tx/${hash}`,
               });
               refetchVaultContract();
               ethBalance.refetch();
@@ -216,7 +201,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           />
 
           <VaultWithdraw
-            vaultData={vaultData}
+            vaultConfig={vaultConfig}
             maxRedeemableShares={maxRedeemableShares}
             previewRedeem={previewRedeem}
             withdrawShares={withdrawShares}
@@ -225,7 +210,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
                 title: "Withdraw submitted",
                 description: "Assets will be sent to your Neutron account.",
                 type: "success",
-                txUrl: `${vaultData.evm.explorerUrl}/tx/${hash}`,
+                txUrl: `${vaultConfig.evm.explorerUrl}/tx/${hash}`,
               });
               ethBalance.refetch();
               refetchVaultContract();
