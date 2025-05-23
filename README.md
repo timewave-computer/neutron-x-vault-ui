@@ -162,7 +162,3 @@ The `vaults.config.json` file contains an array of vault configurations. Each va
     - `abi`: Contract ABI array
     - `functionName`: Name of the function to call
     - `args`: Optional arguments for the function call
-
-```
-
-```
