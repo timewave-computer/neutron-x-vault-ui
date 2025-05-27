@@ -2,7 +2,7 @@
 
 ![X—Vault Demo App Screenshot](./readme_screenshot.png)
 
-A simple web application for interacting with ERC-4626 vault contracts on Ethereum mainnet in order to integrate with Valence cross-chain vaults. Built with Next.js, Tailwind CSS, and wagmi. Nix reproducible environment and Foundry/Anvil for local Ethereum development.
+A simple web application for interacting with ERC-4626 vault contracts on Ethereum mainnet in order to integrate with Valence cross-chain vaults. Built with Next.js, Tailwind CSS, and wagmi. Uses Foundry/Anvil for local Ethereum development.
 
 ## Set up local environment
 
@@ -61,8 +61,9 @@ cast send \
 
 ## Start UI
 
-1. Set up environment variables
-   Verify anvil endpoint
+1. Set up environment variables.
+
+Please also verify the anvil endpoint from the step above.
 
 ```bash
 cp .env.example .env
@@ -87,14 +88,21 @@ npm run start
    - Chain ID: 31337
    - Currency Symbol: ETH
 
-````
-
 ## Linting
 Linting should run on commit, but you can also run the below:
 ```bash
 git add .
 npm exec lint-staged
 ````
+
+## Deploying
+
+To build:
+```bash
+npm run build
+```
+
+Deploy with your preferred method to host NextJS apps. Vercel is the easiest.
 
 ## About `vaults.config.json`
 
