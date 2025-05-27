@@ -94,5 +94,5 @@ export const cosmosWalletInfo: Record<
 };
 
 export const getCosmosWalletInfo = (walletType: WalletType) => {
-  return walletInfo[walletType];
+  return cosmosWalletInfo[walletType];
 };
