@@ -11,7 +11,7 @@ You will need an EVM endpoint with a deployed vault contract. For now, easiest w
 1. Prerequisities
    Install rust, docker, [foundry](https://github.com/foundry-rs/foundry)
 
-2. Clone the deployment scriptx
+2. Clone the deployment script
 
 ```bash
 git clone https://github.com/timewave-computer/valence-protocol
