@@ -21,6 +21,7 @@ git clone https://github.com/timewave-computer/valence-protocol
    We only are interested in `OneWayVault.sol`, but the repo is set up in a way where everything will compile for the time being
 
 ```bash
+git checkout keyne/one-way-vault-deployment
 cd valence-protocol/solidity
 forge soldeer install && forge build
 ```
