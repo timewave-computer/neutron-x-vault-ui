@@ -18,7 +18,7 @@ export const useVaultWithdrawRequests = ({
 }) => {
   const config = useConfig();
   const query = useQuery({
-    queryKey: [QUERY_KEYS.VAULT_WITHDRAW_REQUEST, vaultAddress, ownerAddress],
+    queryKey: [QUERY_KEYS.VAULT_WITHDRAW_REQUESTS, vaultAddress, ownerAddress],
     queryFn: async () => {
       if (!vaultAddress || !ownerAddress) return [];
       const data = await getWithdrawRequest(ownerAddress, vaultAddress);

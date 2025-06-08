@@ -8,4 +8,4 @@ export * from "./useWalletlist";
 export * from "./useAccounts";
 export * from "./useWalletClient";
 export * from "./useKeepWalletStateSynced";
-export * from "./useVaultWithdrawRequest";
+export * from "./useVaultWithdrawRequests";
