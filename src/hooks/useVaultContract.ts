@@ -14,6 +14,7 @@ import { useConvertToAssets, useWalletClient } from "@/hooks";
 import { useMemo, useState } from "react";
 import { useVaultsConfig } from "@/context";
 import { useQuery } from "@tanstack/react-query";
+import { useVaultWithdrawRequests } from "./useVaultWithdrawRequest";
 const REFRESH_INTERVAL = 5000;
 
 /**
@@ -165,6 +166,11 @@ export function useVaultContract({
   /**
    *  Vault queries
    */
+
+  const withdrawRequestsQuery = useVaultWithdrawRequests({
+    vaultAddress: vaultAddress as Address,
+    ownerAddress: address as Address,
+  });
 
   //Preview a deposit (tokens -> vault shares)
   const previewDeposit = async (amount: string) => {

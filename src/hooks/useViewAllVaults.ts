@@ -11,6 +11,7 @@ import { useVaultsConfig, type VaultConfig } from "@/context";
 
 export function useViewAllVaults(): UseViewAllVaultsReturnValue {
   const { address, chainId } = useAccount();
+
   const config = useConfig();
   const { vaultsConfig } = useVaultsConfig();
 
@@ -119,6 +120,7 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
     data: vaults,
     isLoading,
     isError,
+    errors,
   } = useQueries({
     queries: vaultsConfig
       .filter((vaultConfig) =>

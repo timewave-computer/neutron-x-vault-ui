@@ -1,13 +1,13 @@
 [
   {
-    "vaultId": "lbtc",
-    "symbol": "LBTC",
+    "vaultId": "wbtc",
+    "symbol": "WBTC",
     "evm": {
-      "chainId": 31337,
-      "vaultAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "chainId": 1,
+      "vaultAddress": "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98",
       "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      "startBlock": 0,
+      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "startBlock": 22577826,
       "explorerUrl": "https://etherscan.io"
     },
     "cosmos": {
@@ -20,8 +20,8 @@
       }
     },
     "copy": {
-      "name": "LBTC Stable Vault",
-      "description": "Deposit LBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
+      "name": "WBTC Stable Vault",
+      "description": "Deposit WBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
       "deposit": {
         "title": "Deposit",
         "description": "Deposit tokens to start earning yield.",
@@ -29,7 +29,7 @@
       },
       "withdraw": {
         "title": "Withdraw",
-        "description": "Convert shares back to LTBC on Neutron mainnet.",
+        "description": "Convert shares back to WTBC on Neutron mainnet.",
         "cta": "Withdraw"
       },
       "depositInProgress": {

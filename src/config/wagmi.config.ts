@@ -1,5 +1,6 @@
 import { CreateConfigParameters, createConfig, http } from "wagmi";
 import { createClient } from "viem";
+import { mainnet } from "wagmi/chains";
 
 /***
  * Config Wagmi & AppKit support
@@ -28,7 +29,7 @@ export const anvilNetwork = {
   },
 };
 
-const wagmiChainConfig: CreateConfigParameters["chains"] = [anvilNetwork];
+const wagmiChainConfig: CreateConfigParameters["chains"] = [mainnet];
 
 // Configure Wagmi client for Ethereum interactions
 export const wagmiConfig = createConfig({
