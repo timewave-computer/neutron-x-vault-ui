@@ -10,11 +10,14 @@ import { type Address } from "viem";
 import { QUERY_KEYS, valenceVaultABI } from "@/const";
 import { fetchAprFromApi, fetchAprFromContract, formatBigInt } from "@/lib";
 import { readContract } from "@wagmi/core";
-import { useConvertToAssets, useWalletClient } from "@/hooks";
-import { useMemo, useState } from "react";
+import {
+  useConvertToAssets,
+  useWalletClient,
+  useVaultWithdrawRequests,
+} from "@/hooks";
+import { useMemo } from "react";
 import { useVaultsConfig } from "@/context";
 import { useQuery } from "@tanstack/react-query";
-import { useVaultWithdrawRequests } from "./useVaultWithdrawRequest";
 const REFRESH_INTERVAL = 5000;
 
 /**
@@ -25,16 +28,6 @@ const REFRESH_INTERVAL = 5000;
  * - Depositing assets and withdrawing shares
  * - Viewing pending withdrawals
  */
-
-// temporary
-export interface WithdrawRequest {
-  sharesAmount: string;
-  convertedAssetAmount?: string;
-  evmAddress: Address;
-  neutronReceiverAddress: string;
-  withdrawId: number;
-  redemptionRate: bigint;
-}
 
 export function useVaultContract({
   vaultId,
@@ -57,12 +50,6 @@ export function useVaultContract({
   const publicClient = usePublicClient();
   const { evm: walletClient } = useWalletClient();
   const config = useConfig();
-
-  // TEMPORARY: this should be queried from an indexer. This is not implemented yet.
-  const [withdrawRequest, setWithdrawRequest] = useState<
-    WithdrawRequest | undefined
-  >(undefined);
-
   const vaultMetadataQuery = useReadContracts({
     query: {
       refetchInterval: REFRESH_INTERVAL,
@@ -151,18 +138,6 @@ export function useVaultContract({
 
   const userAssetAmount = convertShareBalanceQuery.data;
 
-  // Convert withdraw shares to assets
-  const convertWithdrawSharesQuery = useConvertToAssets({
-    vaultAddress: vaultAddress as Address,
-    shares: parseUnits(
-      withdrawRequest?.sharesAmount ?? "0",
-      Number(shareDecimals),
-    ),
-    refetchInterval: REFRESH_INTERVAL,
-    enabled: isConnected && !!address && !!withdrawRequest,
-  });
-  const convertedWithdrawAssetAmount = convertWithdrawSharesQuery.data;
-
   /**
    *  Vault queries
    */
@@ -170,6 +145,7 @@ export function useVaultContract({
   const withdrawRequestsQuery = useVaultWithdrawRequests({
     vaultAddress: vaultAddress as Address,
     ownerAddress: address as Address,
+    tokenDecimals: Number(tokenDecimals),
   });
 
   //Preview a deposit (tokens -> vault shares)
@@ -329,15 +305,6 @@ export function useVaultContract({
         );
       }
 
-      // TEMPORARY: Return mock transaction hash until actual implementation is ready
-      setWithdrawRequest({
-        sharesAmount: shares,
-        evmAddress: address,
-        neutronReceiverAddress,
-        redemptionRate: redemptionRate ?? BigInt(0),
-        withdrawId: 0,
-      });
-
       return redeemHash;
     } catch (error) {
       handleAndThrowError(error, "Withdraw failed");
@@ -348,7 +315,7 @@ export function useVaultContract({
   const refetch = () => {
     vaultMetadataQuery.refetch();
     userDataQuery.refetch();
-    convertWithdrawSharesQuery.refetch();
+    withdrawRequestsQuery.refetch();
     convertShareBalanceQuery.refetch();
   };
 
@@ -356,14 +323,14 @@ export function useVaultContract({
   const isLoading =
     vaultMetadataQuery.isLoading ||
     userDataQuery.isLoading ||
-    convertWithdrawSharesQuery.isLoading ||
+    withdrawRequestsQuery.isLoading ||
     convertShareBalanceQuery.isLoading ||
     aprQuery.isLoading;
 
   const isError =
     vaultMetadataQuery.isError ||
     userDataQuery.isError ||
-    convertWithdrawSharesQuery.isError ||
+    withdrawRequestsQuery.isError ||
     convertShareBalanceQuery.isError ||
     aprQuery.isError;
 
@@ -384,15 +351,11 @@ export function useVaultContract({
       shareBalance: formatBigInt(shareBalance ?? BigInt(0), shareDecimals),
       assetBalance: formatBigInt(userAssetAmount ?? BigInt(0), tokenDecimals),
       apr: aprQuery.data,
-      withdrawRequest: withdrawRequest
-        ? {
-            ...withdrawRequest,
-            convertedAssetAmount: formatBigInt(
-              convertedWithdrawAssetAmount ?? BigInt(0),
-              tokenDecimals,
-            ),
-          }
-        : undefined,
+      withdrawRequests: {
+        data: withdrawRequestsQuery.data ?? [],
+        hasActiveWithdrawRequest:
+          withdrawRequestsQuery.hasActiveWithdrawRequest ?? false,
+      },
     },
   };
 }
@@ -423,9 +386,7 @@ interface UseVaultContractReturnValue {
     maxRedeemableShares?: string;
     shareBalance: string;
     assetBalance: string;
-    withdrawRequest?: WithdrawRequest & {
-      convertedAssetAmount: string;
-    };
+    withdrawRequests: WithdrawRequests;
     apr?: string;
   };
 }
@@ -454,3 +415,16 @@ const handleAndThrowError = (error: unknown, defaultMessage: string) => {
     throw new Error(defaultMessage);
   }
 };
+
+export interface WithdrawRequests {
+  data: Array<{
+    id: number;
+    amount: string;
+    owner_address: string;
+    receiver_address: string;
+    block_number: number;
+    isCompleted: boolean;
+    convertedAssetAmount: string;
+  }>;
+  hasActiveWithdrawRequest: boolean;
+}

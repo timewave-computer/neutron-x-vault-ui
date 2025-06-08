@@ -30,10 +30,9 @@ const getUrl = (vaultAddress: string, ownerAddress: string) => {
 };
 
 export async function getWithdrawRequest(
-  _ownerAddress: string,
+  ownerAddress: string,
   vaultAddress: string,
 ) {
-  const ownerAddress = "0xd9a23b58e684b985f661ce7005aa8e10630150c1";
   const response = await fetch(getUrl(vaultAddress, ownerAddress), {
     headers: {
       "X-Api-Key": INDEXER_API_KEY as string,

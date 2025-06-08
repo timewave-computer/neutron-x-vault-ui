@@ -44,7 +44,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
       maxRedeemableShares,
       shareBalance: userShares,
       assetBalance: userVaultAssets,
-      withdrawRequest,
+      withdrawRequests,
       apr,
     },
     isLoading: isLoadingContract,
@@ -160,16 +160,23 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           maxRedeemableShares &&
           parseFloat(maxRedeemableShares) > 0 &&
           // contains copy for vault path and on deposit success
-          !withdrawRequest && (
+          !withdrawRequests.hasActiveWithdrawRequest && (
             <DepositInProgress copy={vaultConfig.copy.depositInProgress} />
           )}
 
         {/*shows when user has a pending withdrawal */}
-        {isConnected && withdrawRequest && (
-          <WithdrawInProgress
-            vaultConfig={vaultConfig}
-            withdrawRequest={withdrawRequest}
-          />
+        {isConnected && withdrawRequests.hasActiveWithdrawRequest && (
+          <>
+            {withdrawRequests.data
+              .filter((request) => !request.isCompleted)
+              .map((request) => (
+                <WithdrawInProgress
+                  key={request.id}
+                  vaultConfig={vaultConfig}
+                  withdrawRequest={request}
+                />
+              ))}
+          </>
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VaultDeposit

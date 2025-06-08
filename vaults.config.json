@@ -15,7 +15,7 @@
       "startBlock": 0,
       "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
-        "denom": "untrn",
+        "denom": "ibc/TODO",
         "decimals": 6
       }
     },
