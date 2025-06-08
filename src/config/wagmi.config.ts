@@ -1,34 +1,30 @@
 import { CreateConfigParameters, createConfig, http } from "wagmi";
-import { createClient } from "viem";
+import { Chain, createClient } from "viem";
+import { mainnet } from "wagmi/chains";
 
 /***
  * Config Wagmi & AppKit support
  */
 
-export const defaultEvmChainId = 31337;
+let wagmiChainConfig: CreateConfigParameters["chains"] = [mainnet];
 
 const anvilRpcUrl = process.env.NEXT_PUBLIC_ANVIL_RPC_URL as string;
-if (!anvilRpcUrl) {
-  // TODO: once this is live on mainnet, this can be optional / opt-in
-  throw new Error("NEXT_PUBLIC_ANVIL_RPC_URL is not set");
+if (anvilRpcUrl) {
+  const anvilNetwork = {
+    id: 31337,
+    testnet: true,
+    name: "Anvil",
+    nativeCurrency: {
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    rpcUrls: {
+      default: { http: [anvilRpcUrl] },
+    },
+  };
+  wagmiChainConfig = [...wagmiChainConfig, anvilNetwork as Chain];
 }
-
-// Create configuration for private testnet
-export const anvilNetwork = {
-  id: 31337,
-  testnet: true,
-  name: "Anvil",
-  nativeCurrency: {
-    name: "Ethereum",
-    symbol: "ETH",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: { http: [anvilRpcUrl] },
-  },
-};
-
-const wagmiChainConfig: CreateConfigParameters["chains"] = [anvilNetwork];
 
 // Configure Wagmi client for Ethereum interactions
 export const wagmiConfig = createConfig({

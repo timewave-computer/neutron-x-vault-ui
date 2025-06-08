@@ -1,19 +1,19 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, TimelineAnimation } from "@/components";
-import { WithdrawRequest } from "@/hooks";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
 import { shortenAddress, microToBase } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
 import { VaultConfig } from "@/context";
+import { WithdrawRequests } from "@/hooks";
 
 export const WithdrawInProgress = ({
   vaultConfig: _vaultConfig,
   withdrawRequest,
 }: {
   vaultConfig: VaultConfig;
-  withdrawRequest: WithdrawRequest;
+  withdrawRequest: WithdrawRequests["data"][0];
 }) => {
   const {
     symbol,
@@ -28,34 +28,21 @@ export const WithdrawInProgress = ({
     },
   } = _vaultConfig;
 
-  const [isCompleted, setIsCompleted] = useState(false);
-
   const { data: neutronClient } = useStargateClient({
     chainId: cosmosChainId,
   });
 
-  useEffect(() => {
-    // temporary to simulate the success of the transfer.
-    if (!isCompleted) {
-      const timer = setInterval(() => {
-        setIsCompleted(true);
-      }, 10000);
-
-      return () => clearInterval(timer);
-    }
-  }, [isCompleted, setIsCompleted]);
-
   const { data: neutronAccountBalance, isLoading } = useQuery({
     queryKey: [
       QUERY_KEYS.NEUTRON_ACCOUNT_BALANCE,
-      withdrawRequest?.evmAddress,
-      withdrawRequest?.neutronReceiverAddress,
+      withdrawRequest?.owner_address,
+      withdrawRequest?.receiver_address,
     ],
-    enabled: !!neutronClient && !!withdrawRequest?.neutronReceiverAddress,
+    enabled: !!neutronClient && !!withdrawRequest?.receiver_address,
     refetchInterval: 5000,
     queryFn: async () => {
       const balance = await neutronClient?.getBalance(
-        withdrawRequest?.neutronReceiverAddress ?? "",
+        withdrawRequest?.receiver_address ?? "",
         cosmosTokenDenom,
       );
       return microToBase(balance?.amount ?? 0, cosmosTokenDecimals);
@@ -66,7 +53,7 @@ export const WithdrawInProgress = ({
     return null;
   }
 
-  const { convertedAssetAmount, neutronReceiverAddress } = withdrawRequest;
+  const { convertedAssetAmount, receiver_address } = withdrawRequest;
 
   return (
     <div className="mt-8">
@@ -77,21 +64,21 @@ export const WithdrawInProgress = ({
         <div className="py-4">
           <div className="flex flex-col px-4 max-w-[1200px]">
             <div className="text-xl font-beast text-accent-purple mb-2">
-              {isCompleted
+              {withdrawRequest.isCompleted
                 ? withdrawCompletedCopy.title
                 : withdrawInProgressCopy.title}
             </div>
             <div>
               <div className="space-y-1">
                 <p>
-                  {isCompleted
+                  {withdrawRequest.isCompleted
                     ? withdrawCompletedCopy.description
                     : withdrawInProgressCopy.description}
                 </p>
                 <p>
-                  {isCompleted
+                  {withdrawRequest.isCompleted
                     ? `Withdrawal complete. ${convertedAssetAmount} ${symbol} has been transferred to your wallet.`
-                    : `Withdrawing ${convertedAssetAmount} ${symbol} to ${shortenAddress(neutronReceiverAddress)}.`}
+                    : `Withdrawing ${convertedAssetAmount} ${symbol} to ${shortenAddress(receiver_address)}.`}
                 </p>
               </div>
             </div>
@@ -100,7 +87,7 @@ export const WithdrawInProgress = ({
               {/* col 1 */}
               <div className="flex flex-col w-full items-center pb-2">
                 <TimelineAnimation
-                  currentStep={isCompleted ? 1 : 0}
+                  currentStep={withdrawRequest.isCompleted ? 1 : 0}
                   steps={withdrawInProgressCopy.steps}
                 ></TimelineAnimation>
               </div>
@@ -122,12 +109,12 @@ export const WithdrawInProgress = ({
                     </div>
                   )}
                   <a
-                    href={`${cosmosExplorerUrl}/accounts/${neutronReceiverAddress}`}
+                    href={`${cosmosExplorerUrl}/accounts/${receiver_address}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline text-sm font-light text-gray-400 mb-1"
                   >
-                    {neutronReceiverAddress}
+                    {receiver_address}
                   </a>
                 </div>
               </div>
