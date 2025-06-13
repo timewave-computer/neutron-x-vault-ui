@@ -6,7 +6,7 @@ import { z } from "zod";
 
 /**
  * Fetches APR data from an API endpoint
- * Should return a ration (i.e "0.04")
+ * Should return a ratio (i.e "0.04")
  */
 export async function fetchAprFromApi(
   vaultConfig: VaultConfig,
@@ -24,11 +24,8 @@ export async function fetchAprFromApi(
     body?: Record<string, string>;
   };
 
-  // Replace any placeholder variables in the URL
-  const resolvedUrl = url.replace(/{vaultId}/g, vaultConfig.vaultId);
-
   try {
-    const response = await fetch(resolvedUrl, {
+    const response = await fetch(url, {
       method: method || "GET",
       headers,
       body:
