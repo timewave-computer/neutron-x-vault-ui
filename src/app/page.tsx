@@ -2,7 +2,7 @@
 
 import { Card } from "@/components";
 import { useViewAllVaults } from "@/hooks";
-import { formatNumberString } from "@/lib";
+import { formatNumberString, truncateAddress } from "@/lib";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 export default function Home() {
@@ -70,6 +70,9 @@ export default function Home() {
                           <dt className="sr-only">Name</dt>
                           <dd className="text-2xl font-beast text-primary">
                             {vault.copy.name}
+                          </dd>
+                          <dd className="text-sm font-light text-primary">
+                            {truncateAddress(vault.evm.vaultAddress)}
                           </dd>
                         </div>
                         <div className="mt-2">
