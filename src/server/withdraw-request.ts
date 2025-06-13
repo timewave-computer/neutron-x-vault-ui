@@ -1,17 +1,7 @@
 "use server";
 
 import { z } from "zod";
-
-const INDEXER_URL = process.env.INDEXER_API_URL as string;
-
-if (!INDEXER_URL) {
-  throw new Error("INDEXER_API_URL is not set");
-}
-
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY;
-if (!INDEXER_API_KEY) {
-  throw new Error("INDEXER_API_KEY is not set");
-}
+import { fetchFromIndexer } from "@/lib";
 
 const withdrawRequestSchema = z.object({
   id: z.number(),
@@ -25,23 +15,14 @@ const responseSchema = z.object({
   data: z.array(withdrawRequestSchema),
 });
 
-const getUrl = (vaultAddress: string, ownerAddress: string) => {
-  return `${INDEXER_URL}/v1/vault/${vaultAddress}/withdrawRequestsByAddress/${ownerAddress}`;
-};
-
 export async function getWithdrawRequest(
   ownerAddress: string,
   vaultAddress: string,
 ) {
-  const response = await fetch(getUrl(vaultAddress, ownerAddress), {
-    headers: {
-      "X-Api-Key": INDEXER_API_KEY as string,
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch withdraw request");
-  }
-  const data = await response.json();
+  const data = await fetchFromIndexer(
+    vaultAddress,
+    `withdrawRequestsByAddress/${ownerAddress}`,
+  );
   const parsedData = responseSchema.parse(data);
   return parsedData.data;
 }

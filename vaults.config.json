@@ -49,7 +49,7 @@
     },
     "aprRequest": {
       "type": "api",
-      "url": "/api/mock-apr",
+      "url": "/api/apr/0x3EA82BDA12e3cba18E4A9fD0cf7DE2fB78cA4d32",
       "method": "GET",
       "headers": {},
       "body": {}
@@ -105,7 +105,7 @@
     },
     "aprRequest": {
       "type": "api",
-      "url": "/api/mock-apr",
+      "url": "/api/apr/0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98",
       "method": "GET",
       "headers": {},
       "body": {}
