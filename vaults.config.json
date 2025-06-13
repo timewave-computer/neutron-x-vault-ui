@@ -1,5 +1,61 @@
 [
   {
+    "vaultId": "test1",
+    "symbol": "WBTC",
+    "evm": {
+      "chainId": 1,
+      "vaultAddress": "0x3EA82BDA12e3cba18E4A9fD0cf7DE2fB78cA4d32",
+      "transactionConfirmationTimeout": 600000,
+      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "startBlock": 22694852,
+      "explorerUrl": "https://etherscan.io"
+    },
+    "cosmos": {
+      "chainId": "neutron-1",
+      "startBlock": 0,
+      "explorerUrl": "https://neutron.celat.one/neutron-1",
+      "token": {
+        "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
+        "decimals": 6
+      }
+    },
+    "copy": {
+      "name": "WBTC Test 1",
+      "description": "Deposit WBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
+      "deposit": {
+        "title": "Deposit",
+        "description": "Deposit tokens to start earning yield.",
+        "cta": "Deposit"
+      },
+      "withdraw": {
+        "title": "Withdraw",
+        "description": "Convert shares back to WTBC on Neutron mainnet.",
+        "cta": "Withdraw"
+      },
+      "depositInProgress": {
+        "title": "Your Funds are Working",
+        "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
+        "description": "Valence automatically bridges your USDC from Ethereum mainnet to Neutron via IBC Eureka, deposits to an Astroport liquidity position, and earns yield until you initiate a withdrawal."
+      },
+      "withdrawInProgress": {
+        "title": "Withdraw in Progress",
+        "description": "Your vault shares are being transferred to your Neutron account. This may take a few minutes.",
+        "steps": ["Astroport Supervault", "Neutron Account"]
+      },
+      "withdrawCompleted": {
+        "title": "Withdraw Completed",
+        "description": "Your funds have been transferred to your Neutron account."
+      }
+    },
+    "aprRequest": {
+      "type": "api",
+      "url": "/api/mock-apr",
+      "method": "GET",
+      "headers": {},
+      "body": {}
+    }
+  },
+  {
     "vaultId": "wbtc",
     "symbol": "WBTC",
     "evm": {
@@ -15,7 +71,7 @@
       "startBlock": 0,
       "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
-        "denom": "ibc/TODO",
+        "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
         "decimals": 6
       }
     },
