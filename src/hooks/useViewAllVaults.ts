@@ -94,7 +94,7 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
         apr = await fetchAprFromApi(vault);
       }
       const aprPercentage = apr
-        ? (parseFloat(apr) * 100).toString()
+        ? (parseFloat(apr) * 100).toFixed(2)
         : undefined;
 
       const result = {

@@ -43,15 +43,13 @@ export async function fetchAprFromApi(
 
     const data = await response.json();
 
-    const aprValue = z.string().parse(data);
-
-    return aprValue;
+    return z.string().parse(data);
   } catch (error) {
     console.error(
       `Error fetching APR from API for vault ${vaultConfig.vaultId}:`,
       error,
     );
-    throw error;
+    return "0.00";
   }
 }
 
@@ -90,6 +88,6 @@ export async function fetchAprFromContract(
       `Error fetching APR from contract for vault ${vaultConfig.vaultId}:`,
       error,
     );
-    throw error;
+    return "0.00";
   }
 }
