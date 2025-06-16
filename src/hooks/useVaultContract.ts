@@ -150,7 +150,8 @@ export function useVaultContract({
   });
 
   const convertToAssets = async (amountShares: string) => {
-    if (!shareDecimals) throw new Error("Failed to convert to assets");
+    if (!shareDecimals || !tokenDecimals)
+      throw new Error("Failed to convert to assets");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
