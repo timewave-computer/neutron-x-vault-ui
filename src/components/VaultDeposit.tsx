@@ -12,7 +12,6 @@ interface VaultDepositProps {
   userTokenBalance: string | undefined;
   isConnected: boolean;
   previewDeposit: (amount: string) => Promise<PreviewTransactionData>;
-  calculateDepositFee: (amount: string) => Promise<string>;
   depositWithAmount: (amount: string) => Promise<`0x${string}` | undefined>;
   onDepositSuccess: (hash: `0x${string}`) => void;
   onDepositError: (error: Error) => void;

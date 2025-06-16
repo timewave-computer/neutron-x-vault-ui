@@ -4,17 +4,14 @@ import {
   usePublicClient,
   useConfig,
   useReadContracts,
+  useReadContract,
 } from "wagmi";
 import { parseUnits, erc20Abi, BaseError } from "viem";
 import { type Address } from "viem";
 import { QUERY_KEYS, valenceVaultABI } from "@/const";
 import { fetchAprFromApi, fetchAprFromContract, formatBigInt } from "@/lib";
 import { readContract } from "@wagmi/core";
-import {
-  useConvertToAssets,
-  useWalletClient,
-  useVaultWithdrawRequests,
-} from "@/hooks";
+import { useWalletClient, useVaultWithdrawRequests } from "@/hooks";
 import { useMemo } from "react";
 import { useVaultsConfig } from "@/context";
 import { useQuery } from "@tanstack/react-query";
@@ -129,11 +126,15 @@ export function useVaultContract({
   const maxRedeemableShares = userDataQuery.data?.[1]?.result;
 
   // Convert user's share balance to assets
-  const convertShareBalanceQuery = useConvertToAssets({
-    vaultAddress: vaultAddress as Address,
-    shares: shareBalance,
-    refetchInterval: REFRESH_INTERVAL,
-    enabled: isConnected && !!address && !!shareBalance,
+  const convertShareBalanceQuery = useReadContract({
+    query: {
+      enabled: isConnected && !!address && !!shareBalance,
+      refetchInterval: REFRESH_INTERVAL,
+    },
+    abi: valenceVaultABI,
+    functionName: "convertToAssets",
+    address: vaultAddress as Address,
+    args: shareBalance ? [shareBalance] : [BigInt(0)],
   });
 
   const userAssetAmount = convertShareBalanceQuery.data;
@@ -148,30 +149,48 @@ export function useVaultContract({
     tokenDecimals: Number(tokenDecimals),
   });
 
+  const convertToAssets = async (amountShares: string) => {
+    if (!shareDecimals) throw new Error("Failed to convert to assets");
+    if (!address) throw new Error("Not connected");
+    if (!walletClient) throw new Error("Wallet not connected");
+    if (!publicClient) throw new Error("Public client not initialized");
+
+    const parsedShares = parseUnits(amountShares, Number(shareDecimals));
+
+    const amountAssets = await readContract(config, {
+      abi: valenceVaultABI,
+      functionName: "convertToAssets",
+      address: vaultAddress as Address,
+      args: [parsedShares],
+    });
+
+    return formatBigInt(amountAssets, tokenDecimals);
+  };
+
   //Preview a deposit (tokens -> vault shares)
-  const previewDeposit = async (amount: string) => {
+  const previewDeposit = async (amountAssets: string) => {
     if (!shareDecimals) throw new Error("Failed to preview deposit");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
-    const depositFee = await calculateDepositFee(amount);
+    const depositFee = await calculateDepositFee(amountAssets);
 
-    const amountAfterFee = parseFloat(amount) - parseFloat(depositFee);
+    const assetsAfterFee = parseFloat(amountAssets) - parseFloat(depositFee);
 
     const parsedDepositAmount = parseUnits(
-      amountAfterFee.toString(),
+      assetsAfterFee.toString(),
       Number(tokenDecimals),
     );
 
-    const previewAmount = await readContract(config, {
+    const previewSharesAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "previewDeposit",
       address: vaultAddress as Address,
       args: [parsedDepositAmount],
     });
 
-    const depositAmount = formatBigInt(previewAmount, tokenDecimals);
+    const depositAmount = formatBigInt(previewSharesAmount, shareDecimals);
 
     return {
       amount: depositAmount,
@@ -180,21 +199,19 @@ export function useVaultContract({
   };
 
   // Preview a withdrawal (vault shares -> tokens)
-  const previewRedeem = async (shares: string) => {
+  const previewRedeem = async (amountShares: string) => {
     if (!tokenDecimals) throw new Error("Failed to preview redeem");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
-    const parsedShares = parseUnits(shares, Number(shareDecimals));
+    const withdrawFee = await calculateWithdrawFee(amountShares);
 
-    const withdrawFee = await calculateWithdrawFee(shares);
-
-    const amountAfterFee = parseFloat(shares) - parseFloat(withdrawFee);
+    const amountAfterFee = parseFloat(amountShares) - parseFloat(withdrawFee);
 
     const parsedAmountAfterFee = parseUnits(
       amountAfterFee.toString(),
-      Number(tokenDecimals),
+      Number(shareDecimals),
     );
 
     const previewAmount = await readContract(config, {
@@ -213,34 +230,36 @@ export function useVaultContract({
   };
 
   // Calculate the deposit fee for a given amount of shares
-  const calculateDepositFee = async (shares: string) => {
+  const calculateDepositFee = async (assets: string) => {
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
-    const parsedShares = parseUnits(shares, Number(shareDecimals));
+    const parsedAssets = parseUnits(assets, Number(tokenDecimals));
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "calculateDepositFee",
       address: vaultAddress as Address,
-      args: [parsedShares],
+      args: [parsedAssets],
     });
 
     return formatBigInt(previewAmount, tokenDecimals);
   };
 
   // Calculate the withdraw fee for a given amount of shares
-  const calculateWithdrawFee = async (shares: string) => {
+  const calculateWithdrawFee = async (amountShares: string) => {
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
-    const parsedShares = parseUnits(shares, Number(shareDecimals));
+    const amountAssets = await convertToAssets(amountShares);
+
+    const parsedAmountAssets = parseUnits(amountAssets, Number(tokenDecimals));
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "calculateWithdrawalFee",
       address: vaultAddress as Address,
-      args: [parsedShares],
+      args: [parsedAmountAssets],
     });
 
     return formatBigInt(previewAmount, tokenDecimals);

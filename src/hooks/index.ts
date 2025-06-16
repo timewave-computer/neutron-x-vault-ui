@@ -1,7 +1,6 @@
 export * from "./useTokenBalances";
 export * from "./useViewAllVaults";
 export * from "./useVaultContract";
-export * from "./useConvertToAssets";
 export * from "./useCreateEvmWallets";
 export * from "./useCreateCosmosWallets";
 export * from "./useWalletlist";
