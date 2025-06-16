@@ -146,6 +146,25 @@ export const valenceVaultABI = [
   },
   {
     type: "function",
+    name: "calculateWithdrawalFee",
+    inputs: [
+      {
+        name: "assets",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "config",
     inputs: [],
     outputs: [
@@ -161,6 +180,11 @@ export const valenceVaultABI = [
       },
       {
         name: "depositFeeBps",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      {
+        name: "withdrawRateBps",
         type: "uint32",
         internalType: "uint32",
       },
@@ -284,7 +308,7 @@ export const valenceVaultABI = [
   },
   {
     type: "function",
-    name: "feesOwedInAsset",
+    name: "feesAccruedInAsset",
     inputs: [],
     outputs: [
       {
@@ -875,6 +899,11 @@ export const valenceVaultABI = [
         internalType: "address",
       },
       {
+        name: "isReceiverContract",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
         name: "redemptionRate",
         type: "uint256",
         internalType: "uint256",
@@ -945,6 +974,11 @@ export const valenceVaultABI = [
           },
           {
             name: "depositFeeBps",
+            type: "uint32",
+            internalType: "uint32",
+          },
+          {
+            name: "withdrawRateBps",
             type: "uint32",
             internalType: "uint32",
           },

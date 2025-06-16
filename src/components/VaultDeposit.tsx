@@ -4,13 +4,15 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { VaultConfig } from "@/context";
+import { type VaultConfig } from "@/context";
+import { type PreviewTransactionData } from "@/hooks";
 
 interface VaultDepositProps {
   vaultConfig: VaultConfig;
   userTokenBalance: string | undefined;
   isConnected: boolean;
-  previewDeposit: (amount: string) => Promise<string>;
+  previewDeposit: (amount: string) => Promise<PreviewTransactionData>;
+  calculateDepositFee: (amount: string) => Promise<string>;
   depositWithAmount: (amount: string) => Promise<`0x${string}` | undefined>;
   onDepositSuccess: (hash: `0x${string}`) => void;
   onDepositError: (error: Error) => void;
@@ -33,7 +35,7 @@ export const VaultDeposit = ({
 
   const [depositInput, setDepositInput] = useState("");
 
-  const { data: previewDepositAmount } = useQuery({
+  const { data: previewDepositData } = useQuery({
     enabled: !!vaultAddress && parseFloat(depositInput) > 0 && isConnected,
     staleTime: 0,
     queryKey: [QUERY_KEYS.VAULT_PREVIEW_DEPOSIT, vaultAddress, depositInput],
@@ -132,19 +134,26 @@ export const VaultDeposit = ({
       </Button>
 
       {/* Deposit estimate and warning display */}
-      <div className="h-6 mt-2 flex justify-between items-center">
-        {depositInput &&
-          previewDepositAmount &&
-          parseFloat(depositInput) > 0 && (
-            <p className="text-sm text-gray-500">
-              ≈ {previewDepositAmount} shares
-            </p>
-          )}
+      <div className=" mt-2 flex flex-col gap-1">
+        <div className="h-4 flex gap-2 justify-between items-center">
+          {depositInput &&
+            previewDepositData &&
+            parseFloat(depositInput) > 0 && (
+              <>
+                <p className="text-sm text-gray-500">
+                  ≈ {previewDepositData.amount} shares
+                </p>
+                <p className="text-sm text-gray-500">
+                  {previewDepositData.fee} {symbol} deposit fee
+                </p>
+              </>
+            )}
+        </div>
         {isConnected &&
           depositInput &&
           userTokenBalance &&
           parseFloat(depositInput) > parseFloat(userTokenBalance) && (
-            <p className="text-sm text-secondary">
+            <p className=" h-2 text-sm text-secondary text-right">
               Insufficient {symbol} balance
             </p>
           )}

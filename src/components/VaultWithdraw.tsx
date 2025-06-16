@@ -4,14 +4,14 @@ import { Button, Input, Card } from "@/components";
 import { handleNumberInput, shortenAddress } from "@/lib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/const";
-import { useAccounts } from "@/hooks";
+import { type PreviewTransactionData, useAccounts } from "@/hooks";
 import { useWalletModal, type VaultConfig } from "@/context";
 import { getChainInfo } from "@/config";
 
 interface VaultWithdrawProps {
   vaultConfig: VaultConfig;
   maxRedeemableShares: string | undefined;
-  previewRedeem: (amount: string) => Promise<string>;
+  previewRedeem: (amount: string) => Promise<PreviewTransactionData>;
   withdrawShares: ({
     shares,
     maxLossBps,
@@ -53,7 +53,7 @@ export const VaultWithdraw = ({
   const cosmosChainInfo = getChainInfo(cosmosChainId);
   const cosmosChainName = cosmosChainInfo?.chainName;
 
-  const { data: previewRedeemAmount } = useQuery({
+  const { data: previewRedeemData } = useQuery({
     enabled: !!vaultAddress && parseFloat(withdrawInput) > 0 && isConnected,
     staleTime: 0,
     queryKey: [QUERY_KEYS.VAULT_PREVIEW_WITHDRAW, vaultAddress, withdrawInput],
@@ -174,29 +174,31 @@ export const VaultWithdraw = ({
       )}
 
       {/* Withdraw estimate and warning display */}
-      <div className="h-6 mt-4 flex justify-between items-center">
-        {withdrawInput &&
-          parseFloat(withdrawInput) > 0 &&
-          previewRedeemAmount && (
-            <p className="text-sm text-gray-500">
-              ≈ {previewRedeemAmount} {symbol}{" "}
-              {userCosmosAddress
-                ? "to " + shortenAddress(userCosmosAddress)
-                : ""}
-            </p>
-          )}
-        {isConnected &&
-          withdrawInput &&
-          (!maxRedeemableShares || maxRedeemableShares === "0") && (
-            <p className="text-sm text-secondary">
-              You need vault shares to withdraw
-            </p>
-          )}
+      <div className=" mt-2 flex flex-col gap-1">
+        <div className="h-4 flex gap-2 justify-between items-center">
+          {withdrawInput &&
+            parseFloat(withdrawInput) > 0 &&
+            previewRedeemData && (
+              <>
+                <p className="text-sm text-gray-500">
+                  ≈ {previewRedeemData.amount} {symbol}{" "}
+                  {userCosmosAddress
+                    ? "to " + shortenAddress(userCosmosAddress)
+                    : ""}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {previewRedeemData.fee} {symbol} withdraw fee
+                </p>
+              </>
+            )}
+        </div>
         {isConnected &&
           withdrawInput &&
           maxRedeemableShares &&
           parseFloat(withdrawInput) > parseFloat(maxRedeemableShares) && (
-            <p className="text-sm text-secondary">Insufficient vault balance</p>
+            <p className="text-sm text-secondary text-right">
+              Insufficient vault balance
+            </p>
           )}
       </div>
     </Card>

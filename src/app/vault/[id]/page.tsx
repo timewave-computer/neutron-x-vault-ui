@@ -39,6 +39,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     refetch: refetchVaultContract,
     previewRedeem,
     previewDeposit,
+    calculateDepositFee,
     data: {
       tvl,
       maxRedeemableShares,
@@ -184,6 +185,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
             userTokenBalance={userTokenBalance.toString() ?? "0"}
             isConnected={isConnected}
             previewDeposit={previewDeposit}
+            calculateDepositFee={calculateDepositFee}
             depositWithAmount={depositWithAmount}
             onDepositSuccess={(hash: `0x${string}`) => {
               const toastDescription = apr

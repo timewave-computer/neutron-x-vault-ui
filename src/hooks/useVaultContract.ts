@@ -155,15 +155,28 @@ export function useVaultContract({
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
-    const parsedAmount = parseUnits(amount, Number(tokenDecimals));
+    const depositFee = await calculateDepositFee(amount);
+
+    const amountAfterFee = parseFloat(amount) - parseFloat(depositFee);
+
+    const parsedDepositAmount = parseUnits(
+      amountAfterFee.toString(),
+      Number(tokenDecimals),
+    );
+
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "previewDeposit",
       address: vaultAddress as Address,
-      args: [parsedAmount],
+      args: [parsedDepositAmount],
     });
 
-    return formatBigInt(previewAmount, shareDecimals);
+    const depositAmount = formatBigInt(previewAmount, tokenDecimals);
+
+    return {
+      amount: depositAmount,
+      fee: depositFee,
+    };
   };
 
   // Preview a withdrawal (vault shares -> tokens)
@@ -174,9 +187,58 @@ export function useVaultContract({
     if (!publicClient) throw new Error("Public client not initialized");
 
     const parsedShares = parseUnits(shares, Number(shareDecimals));
+
+    const withdrawFee = await calculateWithdrawFee(shares);
+
+    const amountAfterFee = parseFloat(shares) - parseFloat(withdrawFee);
+
+    const parsedAmountAfterFee = parseUnits(
+      amountAfterFee.toString(),
+      Number(tokenDecimals),
+    );
+
     const previewAmount = await readContract(config, {
       abi: valenceVaultABI,
       functionName: "previewRedeem",
+      address: vaultAddress as Address,
+      args: [parsedAmountAfterFee],
+    });
+
+    const withdrawAmount = formatBigInt(previewAmount, tokenDecimals);
+
+    return {
+      amount: withdrawAmount,
+      fee: withdrawFee,
+    };
+  };
+
+  // Calculate the deposit fee for a given amount of shares
+  const calculateDepositFee = async (shares: string) => {
+    if (!address) throw new Error("Not connected");
+    if (!walletClient) throw new Error("Wallet not connected");
+    if (!publicClient) throw new Error("Public client not initialized");
+
+    const parsedShares = parseUnits(shares, Number(shareDecimals));
+    const previewAmount = await readContract(config, {
+      abi: valenceVaultABI,
+      functionName: "calculateDepositFee",
+      address: vaultAddress as Address,
+      args: [parsedShares],
+    });
+
+    return formatBigInt(previewAmount, tokenDecimals);
+  };
+
+  // Calculate the withdraw fee for a given amount of shares
+  const calculateWithdrawFee = async (shares: string) => {
+    if (!address) throw new Error("Not connected");
+    if (!walletClient) throw new Error("Wallet not connected");
+    if (!publicClient) throw new Error("Public client not initialized");
+
+    const parsedShares = parseUnits(shares, Number(shareDecimals));
+    const previewAmount = await readContract(config, {
+      abi: valenceVaultABI,
+      functionName: "calculateWithdrawalFee",
       address: vaultAddress as Address,
       args: [parsedShares],
     });
@@ -342,6 +404,7 @@ export function useVaultContract({
     withdrawShares,
     previewDeposit,
     previewRedeem,
+    calculateDepositFee,
     tokenDecimals: tokenDecimals,
     shareDecimals: shareDecimals,
     data: {
@@ -376,8 +439,9 @@ interface UseVaultContractReturnValue {
     allowSolverCompletion?: boolean;
     neutronReceiverAddress: string;
   }) => Promise<`0x${string}` | undefined>;
-  previewDeposit: (amount: string) => Promise<string>;
-  previewRedeem: (shares: string) => Promise<string>;
+  previewDeposit: (amount: string) => Promise<PreviewTransactionData>;
+  previewRedeem: (shares: string) => Promise<PreviewTransactionData>;
+  calculateDepositFee: (amount: string) => Promise<string>;
   tokenDecimals: number;
   shareDecimals: number;
   data: {
@@ -427,4 +491,9 @@ export interface WithdrawRequests {
     convertedAssetAmount: string;
   }>;
   hasActiveWithdrawRequest: boolean;
+}
+
+export interface PreviewTransactionData {
+  amount: string;
+  fee: string;
 }
