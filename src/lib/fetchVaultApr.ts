@@ -6,7 +6,7 @@ import { z } from "zod";
 
 /**
  * Fetches APR data from an API endpoint
- * Should return a ration (i.e "0.04")
+ * Should return a ratio (i.e "0.04")
  */
 export async function fetchAprFromApi(
   vaultConfig: VaultConfig,
@@ -24,11 +24,8 @@ export async function fetchAprFromApi(
     body?: Record<string, string>;
   };
 
-  // Replace any placeholder variables in the URL
-  const resolvedUrl = url.replace(/{vaultId}/g, vaultConfig.vaultId);
-
   try {
-    const response = await fetch(resolvedUrl, {
+    const response = await fetch(url, {
       method: method || "GET",
       headers,
       body:
@@ -43,15 +40,13 @@ export async function fetchAprFromApi(
 
     const data = await response.json();
 
-    const aprValue = z.string().parse(data);
-
-    return aprValue;
+    return z.string().parse(data);
   } catch (error) {
     console.error(
       `Error fetching APR from API for vault ${vaultConfig.vaultId}:`,
       error,
     );
-    throw error;
+    return "0.00";
   }
 }
 
@@ -90,6 +85,6 @@ export async function fetchAprFromContract(
       `Error fetching APR from contract for vault ${vaultConfig.vaultId}:`,
       error,
     );
-    throw error;
+    return "0.00";
   }
 }

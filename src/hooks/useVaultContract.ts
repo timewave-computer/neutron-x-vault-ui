@@ -95,7 +95,7 @@ export function useVaultContract({
       } else if (vaultConfig.aprRequest.type === "api") {
         apr = await fetchAprFromApi(vaultConfig);
       }
-      return apr ? (parseFloat(apr) * 100).toString() : undefined;
+      return apr ? (parseFloat(apr) * 100).toFixed(2) : undefined;
     },
     queryKey: [QUERY_KEYS.VAULT_APR, vaultId],
     enabled: !!vaultConfig,
