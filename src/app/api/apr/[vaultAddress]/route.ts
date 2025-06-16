@@ -20,16 +20,16 @@ const ratesResponseSchema = z.object({
  * returns decimal value
  */
 
-const aprWindowInDays = 30;
+const APR_RANGE_IN_DAYS = 30;
 
-const getTimerange = (days: number) => {
-  const nowInUtc = new Date().toISOString();
-  const windowAgoInUtc = new Date(
+const getTimestampsForRange = (days: number) => {
+  const endTimestamp = new Date().toISOString();
+  const startTimestamp = new Date(
     Date.now() - days * 24 * 60 * 60 * 1000,
   ).toISOString();
   return {
-    from: windowAgoInUtc,
-    to: nowInUtc,
+    from: startTimestamp,
+    to: endTimestamp,
   };
 };
 
@@ -39,7 +39,7 @@ export async function GET(
 ) {
   try {
     const { vaultAddress } = await params;
-    const { from, to } = getTimerange(aprWindowInDays);
+    const { from, to } = getTimestampsForRange(APR_RANGE_IN_DAYS);
 
     const data = await fetchFromIndexer(
       vaultAddress,
@@ -61,7 +61,7 @@ export async function GET(
       finalOverInitial = finalRate / initialRate;
     }
 
-    const apr = Math.pow(finalOverInitial, 365 / aprWindowInDays) - 1;
+    const apr = Math.pow(finalOverInitial, 365 / APR_RANGE_IN_DAYS) - 1;
 
     return NextResponse.json(apr.toString());
   } catch (error) {
