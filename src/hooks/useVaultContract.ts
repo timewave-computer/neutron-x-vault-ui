@@ -153,7 +153,6 @@ export function useVaultContract({
     if (!shareDecimals || !tokenDecimals)
       throw new Error("Failed to convert to assets");
     if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
     const parsedShares = parseUnits(amountShares, Number(shareDecimals));
@@ -172,7 +171,6 @@ export function useVaultContract({
   const previewDeposit = async (amountAssets: string) => {
     if (!shareDecimals) throw new Error("Failed to preview deposit");
     if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
     const depositFee = await calculateDepositFee(amountAssets);
@@ -203,7 +201,6 @@ export function useVaultContract({
   const previewRedeem = async (amountShares: string) => {
     if (!tokenDecimals) throw new Error("Failed to preview redeem");
     if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
     const withdrawFee = await calculateWithdrawFee(amountShares);
@@ -234,7 +231,6 @@ export function useVaultContract({
   const calculateDepositFee = async (assets: string) => {
     if (!tokenDecimals) throw new Error("Failed to calculate deposit fee");
     if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
     const parsedAssets = parseUnits(assets, Number(tokenDecimals));
@@ -252,7 +248,6 @@ export function useVaultContract({
   const calculateWithdrawFee = async (amountShares: string) => {
     if (!tokenDecimals) throw new Error("Failed to calculate withdraw fee");
     if (!address) throw new Error("Not connected");
-    if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
 
     const amountAssets = await convertToAssets(amountShares);
