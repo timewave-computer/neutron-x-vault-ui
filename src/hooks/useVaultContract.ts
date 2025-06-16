@@ -231,6 +231,7 @@ export function useVaultContract({
 
   // Calculate the deposit fee for a given amount of shares
   const calculateDepositFee = async (assets: string) => {
+    if (!tokenDecimals) throw new Error("Failed to calculate deposit fee");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
@@ -248,6 +249,7 @@ export function useVaultContract({
 
   // Calculate the withdraw fee for a given amount of shares
   const calculateWithdrawFee = async (amountShares: string) => {
+    if (!tokenDecimals) throw new Error("Failed to calculate withdraw fee");
     if (!address) throw new Error("Not connected");
     if (!walletClient) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("Public client not initialized");
