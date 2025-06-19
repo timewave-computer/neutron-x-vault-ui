@@ -15,7 +15,7 @@ const responseSchema = z.object({
   data: z.array(withdrawRequestSchema),
 });
 
-export async function getWithdrawRequest(
+export async function getWithdrawRequests(
   ownerAddress: string,
   vaultAddress: string,
 ) {

@@ -47,6 +47,7 @@ const cosmosSchema = z.object({
     decimals: z.number(),
   }),
   startBlock: z.number(),
+  clearingQueueAddress: z.string(),
 });
 export const vaultConfigSchema = z.object({
   vaultId: z.string(),

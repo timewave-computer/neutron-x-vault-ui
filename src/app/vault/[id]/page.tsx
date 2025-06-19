@@ -10,6 +10,7 @@ import {
   DepositInProgress,
   VaultWithdraw,
   VaultDeposit,
+  WithdrawRequestsTable,
 } from "@/components";
 import { useMemo } from "react";
 
@@ -165,17 +166,17 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           )}
 
         {/*shows when user has a pending withdrawal */}
-        {isConnected && withdrawRequests.hasActiveWithdrawRequest && (
+        {isConnected && withdrawRequests.hasWithdrawRequests && (
           <>
-            {withdrawRequests.data
-              .filter((request) => !request.isCompleted)
-              .map((request) => (
-                <WithdrawInProgress
-                  key={request.id}
-                  vaultConfig={vaultConfig}
-                  withdrawRequest={request}
-                />
-              ))}
+            <WithdrawInProgress
+              key={withdrawRequests.latest?.id}
+              vaultConfig={vaultConfig}
+              withdrawRequest={withdrawRequests.latest}
+            />
+            <WithdrawRequestsTable
+              withdrawRequests={withdrawRequests.data}
+              vaultSymbol={vaultConfig.symbol}
+            />
           </>
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">

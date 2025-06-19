@@ -13,3 +13,4 @@ export * from "./Background";
 export * from "./ConnectWalletModal";
 export * from "./VaultDeposit";
 export * from "./VaultWithdraw";
+export * from "./WithdrawRequestsTable";

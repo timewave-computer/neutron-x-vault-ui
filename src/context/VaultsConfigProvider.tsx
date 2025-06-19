@@ -13,6 +13,7 @@ import { z } from "zod";
 
 type VaultConfigSchema = z.infer<typeof vaultConfigSchema>;
 
+// manually override these types to be "Address" instead of "string"
 export type VaultConfig = VaultConfigSchema & {
   evm: {
     vaultAddress: Address;
@@ -21,6 +22,7 @@ export type VaultConfig = VaultConfigSchema & {
   cosmos: {
     vaultAddress: Address;
     tokenAddress: Address;
+    clearingQueueAddress: Address;
   };
   startBlock: bigint;
 };
