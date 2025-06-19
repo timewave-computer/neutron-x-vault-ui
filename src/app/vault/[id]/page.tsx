@@ -176,6 +176,8 @@ export default function VaultPage({ params }: { params: { id: string } }) {
             <WithdrawRequestsTable
               withdrawRequests={withdrawRequests.data}
               vaultSymbol={vaultConfig.symbol}
+              cosmosExplorerUrl={vaultConfig.cosmos.explorerUrl}
+              clearingQueueAddress={vaultConfig.cosmos.clearingQueueAddress}
             />
           </>
         )}

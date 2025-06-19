@@ -510,6 +510,7 @@ export interface WithdrawRequest {
   receiver_address: string;
   block_number: number;
   isCompleted: boolean;
+  isError: boolean;
   convertedAssetAmount: string;
 }
 

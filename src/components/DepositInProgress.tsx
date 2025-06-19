@@ -20,7 +20,7 @@ export const DepositInProgress: React.FC<DepositInProgressProps> = ({
 
         <div className="py-4">
           <div className="flex flex-col px-4 max-w-[1200px]">
-            <div className="text-xl font-beast text-accent-purple mb-2">
+            <div className="text-2xl font-beast text-accent-purple mb-2">
               {copy.title}
             </div>
 
