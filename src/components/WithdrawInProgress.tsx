@@ -63,27 +63,37 @@ export const WithdrawInProgress = ({
 
         <div className="py-4">
           <div className="flex flex-col px-4 max-w-[1200px]">
-            <div className="text-xl font-beast text-accent-purple mb-2">
+            <div className="text-2xl font-beast text-accent-purple mb-2">
               {withdrawRequest.isCompleted
                 ? withdrawCompletedCopy.title
                 : withdrawInProgressCopy.title}
             </div>
             <div>
-              <div className="space-y-1">
-                <p>
+              <div>
+                <p className="text-sm font-light text-gray-500 pb-1">
+                  Reciever Address:{" "}
+                  <a
+                    href={`${cosmosExplorerUrl}/accounts/${receiver_address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    {receiver_address}
+                  </a>
+                </p>
+                <p className="text-sm font-light text-gray-500 pb-2">
+                  Withdraw Quantity: {convertedAssetAmount} {symbol}
+                </p>
+
+                <p className="mt-2">
                   {withdrawRequest.isCompleted
                     ? withdrawCompletedCopy.description
                     : withdrawInProgressCopy.description}
                 </p>
-                <p>
-                  {withdrawRequest.isCompleted
-                    ? `Withdrawal complete. ${convertedAssetAmount} ${symbol} has been transferred to your wallet.`
-                    : `Withdrawing ${convertedAssetAmount} ${symbol} to ${shortenAddress(receiver_address)}.`}
-                </p>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* col 1 */}
               <div className="flex flex-col w-full items-center pb-2">
                 <TimelineAnimation
@@ -95,7 +105,7 @@ export const WithdrawInProgress = ({
               {/* col 2 */}
               <div>
                 <div className="flex flex-col w-full items-center">
-                  <div className="text-xs text-gray-500 mb-1">
+                  <div className="text-sm text-accent-purple mb-1">
                     Real-time Balance
                   </div>
                   {isLoading ? (
@@ -112,9 +122,9 @@ export const WithdrawInProgress = ({
                     href={`${cosmosExplorerUrl}/accounts/${receiver_address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-sm font-light text-gray-400 mb-1"
+                    className="underline text-sm font-light text-gray-500 mb-1"
                   >
-                    {receiver_address}
+                    {shortenAddress(receiver_address)}
                   </a>
                 </div>
               </div>

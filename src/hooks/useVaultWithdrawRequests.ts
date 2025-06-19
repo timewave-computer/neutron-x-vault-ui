@@ -7,6 +7,7 @@ import { readContract } from "@wagmi/core";
 import { parseUnits } from "viem";
 import { formatBigInt } from "@/lib";
 import { useCosmWasmClient } from "graz";
+import { type CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export const useVaultWithdrawRequests = ({
   vaultAddress,
@@ -47,23 +48,16 @@ export const useVaultWithdrawRequests = ({
             args: [parseUnits(item.amount, tokenDecimals)],
           });
 
-          let isCompleted = false;
-          try {
-            isCompleted = await neutronClient.queryContractSmart(
-              clearingQueueAddress,
-              {
-                obligation_status: {
-                  id: item.id,
-                },
-              },
-            );
-          } catch (error) {
-            console.error(error);
-          }
+          const { isCompleted, isError } = await getObligationStatus(
+            neutronClient,
+            clearingQueueAddress,
+            item.id,
+          );
 
           return {
             ...item,
-            isCompleted: isCompleted,
+            isCompleted,
+            isError,
             convertedAssetAmount: formatBigInt(assetAmount, tokenDecimals),
           };
         }),
@@ -87,4 +81,70 @@ export const useVaultWithdrawRequests = ({
     hasWithdrawRequests,
     hasActiveWithdrawRequest,
   };
+};
+
+enum ObligationStatus {
+  InQueue = "in_queue",
+  Processed = "processed",
+}
+
+const getObligationStatus = async (
+  neutronClient: CosmWasmClient,
+  clearingQueueAddress: string,
+  obligationId: number,
+): Promise<{
+  isCompleted: boolean;
+  isError: boolean;
+}> => {
+  try {
+    const obligationStatus = await neutronClient.queryContractSmart(
+      clearingQueueAddress,
+      {
+        obligation_status: {
+          id: obligationId,
+        },
+      },
+    );
+
+    if (typeof obligationStatus === "string") {
+      if (obligationStatus === ObligationStatus.Processed) {
+        return {
+          isCompleted: true,
+          isError: false,
+        };
+      } else if (obligationStatus === ObligationStatus.InQueue) {
+        return {
+          isCompleted: false,
+          isError: false,
+        };
+      } else {
+        console.error("Unknown obligation status", obligationStatus);
+        return {
+          isCompleted: false,
+          isError: true,
+        };
+      }
+    } else if (
+      typeof obligationStatus === "object" &&
+      !!obligationStatus.error
+    ) {
+      console.error("Obligation error", obligationStatus);
+      return {
+        isCompleted: false,
+        isError: true,
+      };
+    } else {
+      console.error("Unknown obligation status", obligationStatus);
+      return {
+        isCompleted: false,
+        isError: true,
+      };
+    }
+  } catch (error) {
+    console.error("Error getting obligation status", error);
+    return {
+      isCompleted: false,
+      isError: true,
+    };
+  }
 };

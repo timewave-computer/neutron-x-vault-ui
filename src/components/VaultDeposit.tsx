@@ -73,7 +73,7 @@ export const VaultDeposit = ({
   return (
     <Card variant="primary">
       <div className="mb-6">
-        <h3 className="text-lg font-beast text-accent-purple">
+        <h3 className="text-2xl font-beast text-accent-purple">
           {depositCopy.title}
         </h3>
         <div className="flex justify-between items-center mt-2">
