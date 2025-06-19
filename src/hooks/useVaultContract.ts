@@ -436,6 +436,8 @@ export function useVaultContract({
       apr: aprQuery.data,
       withdrawRequests: {
         data: withdrawRequestsQuery.data ?? [],
+        hasActiveWithdrawRequest:
+          withdrawRequestsQuery.hasActiveWithdrawRequest,
         latest:
           withdrawRequestsQuery.data?.sort((a, b) => b.id - a.id)[0] ?? null,
         hasWithdrawRequests: withdrawRequestsQuery.hasWithdrawRequests ?? false,
@@ -515,6 +517,7 @@ export interface WithdrawRequestData {
   data: Array<WithdrawRequest>;
   latest: WithdrawRequest | null;
   hasWithdrawRequests: boolean;
+  hasActiveWithdrawRequest: boolean;
 }
 
 export interface PreviewTransactionData {

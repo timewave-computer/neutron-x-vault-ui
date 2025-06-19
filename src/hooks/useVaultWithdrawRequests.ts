@@ -36,18 +36,10 @@ export const useVaultWithdrawRequests = ({
     ],
     queryFn: async () => {
       if (!vaultAddress || !ownerAddress) return [];
-      const data = await getWithdrawRequests(
-        "0x510c4a1d637ff374399826f421003b775dc3e8dc",
-        vaultAddress,
-      );
+      if (!neutronClient) throw new Error("Neutron client not found");
+      const data = await getWithdrawRequests(ownerAddress, vaultAddress);
       return Promise.all(
         data.map(async (item) => {
-          console.log(
-            "item amount",
-            item.amount,
-            "tokenDecimals",
-            tokenDecimals,
-          );
           const assetAmount = await readContract(config, {
             address: vaultAddress as `0x${string}`,
             abi: valenceVaultABI,
@@ -55,11 +47,9 @@ export const useVaultWithdrawRequests = ({
             args: [parseUnits(item.amount, tokenDecimals)],
           });
 
-          console.log("assetAmount", assetAmount);
-
           let isCompleted = false;
           try {
-            isCompleted = await neutronClient?.queryContractSmart(
+            isCompleted = await neutronClient.queryContractSmart(
               clearingQueueAddress,
               {
                 obligation_status: {
@@ -89,8 +79,12 @@ export const useVaultWithdrawRequests = ({
 
   const hasWithdrawRequests = (query.data && query.data.length > 0) ?? false;
 
+  const hasActiveWithdrawRequest =
+    query.data?.some((item) => !item.isCompleted) ?? false;
+
   return {
     ...query,
     hasWithdrawRequests,
+    hasActiveWithdrawRequest,
   };
 };

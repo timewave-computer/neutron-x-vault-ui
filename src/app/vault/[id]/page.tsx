@@ -161,7 +161,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           maxRedeemableShares &&
           parseFloat(maxRedeemableShares) > 0 &&
           // contains copy for vault path and on deposit success
-          !withdrawRequests.hasWithdrawRequests && (
+          !withdrawRequests.hasActiveWithdrawRequest && (
             <DepositInProgress copy={vaultConfig.copy.depositInProgress} />
           )}
 
