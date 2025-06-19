@@ -6,14 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { shortenAddress, microToBase } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
 import { VaultConfig } from "@/context";
-import { WithdrawRequests } from "@/hooks";
+import { type WithdrawRequestData } from "@/hooks";
 
 export const WithdrawInProgress = ({
   vaultConfig: _vaultConfig,
   withdrawRequest,
 }: {
   vaultConfig: VaultConfig;
-  withdrawRequest: WithdrawRequests["data"][0];
+  withdrawRequest: WithdrawRequestData["latest"];
 }) => {
   const {
     symbol,

@@ -12,12 +12,13 @@
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 0,
+      "startBlock": 27269163,
       "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
         "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
         "decimals": 6
-      }
+      },
+      "clearingQueueAddress": "neutron14swndagawqqtq6mh0z7uyfznw2lpqh3eu4zs4cwxuvdhpdaf944qqvq2mp"
     },
     "copy": {
       "name": "WBTC Test 1",
@@ -70,13 +71,14 @@
       "chainId": "neutron-1",
       "startBlock": 0,
       "explorerUrl": "https://neutron.celat.one/neutron-1",
+      "clearingQueueAddress": "neutron14swndagawqqtq6mh0z7uyfznw2lpqh3eu4zs4cwxuvdhpdaf944qqvq2mp",
       "token": {
         "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
         "decimals": 6
       }
     },
     "copy": {
-      "name": "WBTC Stable Vault",
+      "name": "Mock WBTC Vault",
       "description": "Deposit WBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
       "deposit": {
         "title": "Deposit",

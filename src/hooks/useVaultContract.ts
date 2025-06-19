@@ -42,6 +42,7 @@ export function useVaultContract({
   const tokenAddress = vaultConfig?.evm.tokenAddress;
   const transactionConfirmationTimeout =
     vaultConfig?.evm.transactionConfirmationTimeout;
+  const clearingQueueAddress = vaultConfig?.cosmos.clearingQueueAddress;
 
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
@@ -147,6 +148,8 @@ export function useVaultContract({
     vaultAddress: vaultAddress as Address,
     ownerAddress: address as Address,
     tokenDecimals: Number(tokenDecimals),
+    clearingQueueAddress: clearingQueueAddress as Address,
+    cosmosChainId: vaultConfig?.cosmos.chainId as string,
   });
 
   const convertToAssets = async (amountShares: string) => {
@@ -433,8 +436,9 @@ export function useVaultContract({
       apr: aprQuery.data,
       withdrawRequests: {
         data: withdrawRequestsQuery.data ?? [],
-        hasActiveWithdrawRequest:
-          withdrawRequestsQuery.hasActiveWithdrawRequest ?? false,
+        latest:
+          withdrawRequestsQuery.data?.sort((a, b) => b.id - a.id)[0] ?? null,
+        hasWithdrawRequests: withdrawRequestsQuery.hasWithdrawRequests ?? false,
       },
     },
   };
@@ -467,7 +471,7 @@ interface UseVaultContractReturnValue {
     maxRedeemableShares?: string;
     shareBalance: string;
     assetBalance: string;
-    withdrawRequests: WithdrawRequests;
+    withdrawRequests: WithdrawRequestData;
     apr?: string;
   };
 }
@@ -497,17 +501,20 @@ const handleAndThrowError = (error: unknown, defaultMessage: string) => {
   }
 };
 
-export interface WithdrawRequests {
-  data: Array<{
-    id: number;
-    amount: string;
-    owner_address: string;
-    receiver_address: string;
-    block_number: number;
-    isCompleted: boolean;
-    convertedAssetAmount: string;
-  }>;
-  hasActiveWithdrawRequest: boolean;
+export interface WithdrawRequest {
+  id: number;
+  amount: string;
+  owner_address: string;
+  receiver_address: string;
+  block_number: number;
+  isCompleted: boolean;
+  convertedAssetAmount: string;
+}
+
+export interface WithdrawRequestData {
+  data: Array<WithdrawRequest>;
+  latest: WithdrawRequest | null;
+  hasWithdrawRequests: boolean;
 }
 
 export interface PreviewTransactionData {
