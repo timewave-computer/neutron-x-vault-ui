@@ -25,7 +25,7 @@ export const useVaultWithdrawRequests = ({
   const config = useConfig();
 
   const { data: neutronClient } = useCosmWasmClient({
-    chainId: "neutron-1", // temporary hardcode. it should always be neutron-1, but should be set in config somewhere
+    chainId: cosmosChainId,
   });
 
   const query = useQuery({

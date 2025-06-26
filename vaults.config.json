@@ -11,11 +11,11 @@
       "explorerUrl": "https://etherscan.io"
     },
     "cosmos": {
-      "chainId": "cosmoshub-4",
+      "chainId": "neutron-1",
       "startBlock": 27269163,
       "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
-        "denom": "ibc/DBD9E339E1B093A052D76BECFFDE8435EAC114CF2133346B4D691F3F2068C957",
+        "denom": "ibc/B7BF60BB54433071B49D586F54BD4DED5E20BEFBBA91958E87488A761115106B",
         "decimals": 8
       },
       "clearingQueueAddress": "neutron16dk4zld6slxhjruse5pvfe3kz7ts2lm76qyy9pvzqs7ptguw2seq3vynyp"
