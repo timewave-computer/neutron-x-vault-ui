@@ -1,5 +1,62 @@
 [
   {
+    "vaultId": "lbtc-test",
+    "symbol": "LBTC",
+    "evm": {
+      "chainId": 1,
+      "vaultAddress": "0x1c2d8f447167fa7d28b2ec869df9d320aa2e6a71",
+      "transactionConfirmationTimeout": 600000,
+      "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494",
+      "startBlock": 22783642,
+      "explorerUrl": "https://etherscan.io"
+    },
+    "cosmos": {
+      "chainId": "neutron-1",
+      "startBlock": 27269163,
+      "explorerUrl": "https://neutron.celat.one/neutron-1",
+      "token": {
+        "denom": "ibc/B7BF60BB54433071B49D586F54BD4DED5E20BEFBBA91958E87488A761115106B",
+        "decimals": 8
+      },
+      "clearingQueueAddress": "neutron16dk4zld6slxhjruse5pvfe3kz7ts2lm76qyy9pvzqs7ptguw2seq3vynyp"
+    },
+    "copy": {
+      "name": "LBTC Test 1",
+      "description": "Deposit LBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
+      "deposit": {
+        "title": "Deposit",
+        "description": "Deposit tokens to start earning yield.",
+        "cta": "Deposit"
+      },
+      "withdraw": {
+        "title": "Withdraw",
+        "description": "Convert shares back to LBTC on Neutron mainnet.",
+        "cta": "Withdraw"
+      },
+      "depositInProgress": {
+        "title": "Your Funds are Working",
+        "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
+        "description": "Valence automatically bridges your LBTC from Ethereum mainnet to Neutron via IBC Eureka, deposits to an Astroport liquidity position, and earns yield until you initiate a withdrawal."
+      },
+      "withdrawInProgress": {
+        "title": "Withdraw in Progress",
+        "description": "Your vault shares are being transferred to your Neutron account. This may take a few minutes.",
+        "steps": ["Astroport Supervault", "Neutron Account"]
+      },
+      "withdrawCompleted": {
+        "title": "Withdraw Completed",
+        "description": "Your funds have been transferred to your Neutron account."
+      }
+    },
+    "aprRequest": {
+      "type": "api",
+      "url": "/api/apr/0x1c2d8f447167fa7d28b2ec869df9d320aa2e6a71",
+      "method": "GET",
+      "headers": {},
+      "body": {}
+    }
+  },
+  {
     "vaultId": "test1",
     "symbol": "WBTC",
     "evm": {
