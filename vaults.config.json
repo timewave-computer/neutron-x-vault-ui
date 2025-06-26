@@ -1,7 +1,7 @@
 [
   {
     "vaultId": "lbtc-test",
-    "symbol": "LBTC Test 1",
+    "symbol": "LBTC",
     "evm": {
       "chainId": 1,
       "vaultAddress": "0x1c2d8f447167fa7d28b2ec869df9d320aa2e6a71",
