@@ -28,7 +28,7 @@ export const WithdrawInProgress = ({
     },
   } = _vaultConfig;
 
-  const { data: neutronClient } = useStargateClient({
+  const { data: cosmosClient } = useStargateClient({
     chainId: cosmosChainId,
   });
 
@@ -38,10 +38,10 @@ export const WithdrawInProgress = ({
       withdrawRequest?.owner_address,
       withdrawRequest?.receiver_address,
     ],
-    enabled: !!neutronClient && !!withdrawRequest?.receiver_address,
+    enabled: !!cosmosClient && !!withdrawRequest?.receiver_address,
     refetchInterval: 5000,
     queryFn: async () => {
-      const balance = await neutronClient?.getBalance(
+      const balance = await cosmosClient?.getBalance(
         withdrawRequest?.receiver_address ?? "",
         cosmosTokenDenom,
       );
