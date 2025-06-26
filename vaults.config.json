@@ -36,7 +36,7 @@
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
-        "description": "Valence automatically bridges your USDC from Ethereum mainnet to Neutron via IBC Eureka, deposits to an Astroport liquidity position, and earns yield until you initiate a withdrawal."
+        "description": "Valence automatically bridges your LBTC from Ethereum mainnet to Neutron via IBC Eureka, deposits to an Astroport liquidity position, and earns yield until you initiate a withdrawal."
       },
       "withdrawInProgress": {
         "title": "Withdraw in Progress",
