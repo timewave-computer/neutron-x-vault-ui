@@ -90,15 +90,18 @@ npm run start
    - Currency Symbol: ETH
 
 ## Linting
+
 Linting should run on commit, but you can also run the below:
+
 ```bash
 git add .
 npm exec lint-staged
-````
+```
 
 ## Deploying
 
 To build:
+
 ```bash
 npm run build
 ```
@@ -108,6 +111,8 @@ Deploy with your preferred method to host NextJS apps. Vercel is the easiest.
 ## About `vaults.config.json`
 
 The `vaults.config.json` file contains an array of vault configurations. Each vault object has the following fields:
+
+_NOTE:_ Not all fields have to be specified in the config. Some fields have resonable defaults and can be overwritten if supplied. See `vaultConfigSchema.ts` for fields with defaults.
 
 - `vaultId`: A unique identifier for the vault used internally by the application
 - `symbol`: The symbol of the token accepted by the vault (e.g., "USDC", "ETH")
@@ -119,8 +124,7 @@ The `vaults.config.json` file contains an array of vault configurations. Each va
   - `vaultAddress`: The Ethereum proxy address of the vault contract
   - `tokenAddress`: The address of the ERC-20 token that the vault accepts as deposits
   - `transactionConfirmationTimeout`: Maximum time (in milliseconds) to wait for transaction confirmations
-  - `startBlock`: The block number from which to start scanning for vault events
-  - `explorerUrl`: URL for the blockchain explorer (e.g., "https://etherscan.io")
+  - `explorerUrl`: URL for the blockchain explorer
 
 ### Cosmos Configuration
 
@@ -130,13 +134,16 @@ The `vaults.config.json` file contains an array of vault configurations. Each va
   - `token`: Token configuration
     - `denom`: The denomination of the token on the Cosmos chain
     - `decimals`: Number of decimal places for the token
-  - `startBlock`: The block number from which to start scanning for vault events
+  - `clearingQueueAddress`: The address of the clearing queue contract on the Cosmos chain
 
 ### UI Copy Configuration
 
 - `copy`: Text content for the UI
   - `name`: Human-readable name of the vault
   - `description`: A brief description of the vault's purpose
+  - `paused`: Text for pause indicator for vault:
+    - `title`: Title for pause indicator
+    - `description`: Description in the pause indicator. Can be used to provide next steps.
   - `deposit`: Deposit-related text
     - `title`: Title for the deposit section
     - `description`: Description of the deposit process

@@ -31,11 +31,10 @@ const evmSchema = z.object({
   vaultAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault address"),
-  transactionConfirmationTimeout: z.number(),
+  transactionConfirmationTimeout: z.number().default(600000),
   tokenAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid token address"),
-  startBlock: z.number(),
   explorerUrl: z.string().default("https://etherscan.io"),
 });
 

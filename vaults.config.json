@@ -5,9 +5,7 @@
     "evm": {
       "chainId": 1,
       "vaultAddress": "0x58e3e5eeae41c4ab8f954189dc9daef8ac7a17f9",
-      "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      "startBlock": 22837730
+      "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
     },
     "cosmos": {
       "chainId": "neutron-1",
@@ -49,9 +47,7 @@
     "evm": {
       "chainId": 1,
       "vaultAddress": "0x9fe5b9c7ddbd26d0dc93634e15eb1a5d34c85493",
-      "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494",
-      "startBlock": 22837541
+      "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494"
     },
     "cosmos": {
       "chainId": "neutron-1",
@@ -93,9 +89,7 @@
     "evm": {
       "chainId": 1,
       "vaultAddress": "0x1c2d8f447167fa7d28b2ec869df9d320aa2e6a71",
-      "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494",
-      "startBlock": 22783642
+      "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494"
     },
     "cosmos": {
       "chainId": "neutron-1",
@@ -137,9 +131,7 @@
     "evm": {
       "chainId": 1,
       "vaultAddress": "0x3EA82BDA12e3cba18E4A9fD0cf7DE2fB78cA4d32",
-      "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "startBlock": 22694852
+      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     "cosmos": {
       "chainId": "neutron-1",
@@ -181,9 +173,7 @@
     "evm": {
       "chainId": 1,
       "vaultAddress": "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98",
-      "transactionConfirmationTimeout": 600000,
-      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "startBlock": 22577826
+      "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     "cosmos": {
       "chainId": "neutron-1",
