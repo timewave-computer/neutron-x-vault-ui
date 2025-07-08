@@ -31,22 +31,20 @@ const evmSchema = z.object({
   vaultAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid vault address"),
-  transactionConfirmationTimeout: z.number(),
+  transactionConfirmationTimeout: z.number().default(600000),
   tokenAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid token address"),
-  startBlock: z.number(),
-  explorerUrl: z.string(),
+  explorerUrl: z.string().default("https://etherscan.io"),
 });
 
 const cosmosSchema = z.object({
   chainId: z.string(),
-  explorerUrl: z.string(),
+  explorerUrl: z.string().default("https://neutron.celat.one/neutron-1"),
   token: z.object({
     denom: z.string(),
     decimals: z.number(),
   }),
-  startBlock: z.number(),
   clearingQueueAddress: z.string(),
 });
 export const vaultConfigSchema = z.object({
@@ -57,21 +55,43 @@ export const vaultConfigSchema = z.object({
   copy: z.object({
     name: z.string(),
     description: z.string(),
-    deposit: z.object({
-      title: z.string(),
-      description: z.string(),
-      cta: z.string(),
-    }),
+    paused: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+      })
+      .default({
+        title: "Vault is Paused",
+        description:
+          "This vault is currently paused. Deposits and withdrawals are temporarily disabled.",
+      }),
+    deposit: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        cta: z.string(),
+      })
+      .default({
+        title: "Deposit",
+        description: "Deposit tokens to start earning yield.",
+        cta: "Deposit",
+      }),
     depositInProgress: z.object({
       title: z.string(),
       steps: z.array(z.string()),
       description: z.string(),
     }),
-    withdraw: z.object({
-      title: z.string(),
-      description: z.string(),
-      cta: z.string(),
-    }),
+    withdraw: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        cta: z.string(),
+      })
+      .default({
+        title: "Withdraw",
+        description: "Withdraw tokens from the vault.",
+        cta: "Withdraw",
+      }),
     withdrawInProgress: z.object({
       title: z.string(),
       description: z.string(),

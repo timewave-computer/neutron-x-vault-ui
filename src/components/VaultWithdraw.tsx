@@ -25,6 +25,7 @@ interface VaultWithdrawProps {
   }) => Promise<`0x${string}` | undefined>;
   onWithdrawSuccess: (hash: `0x${string}`) => void;
   onWithdrawError: (error: Error) => void;
+  isPaused: boolean;
 }
 
 export const VaultWithdraw = ({
@@ -34,6 +35,7 @@ export const VaultWithdraw = ({
   withdrawShares,
   onWithdrawSuccess,
   onWithdrawError,
+  isPaused,
 }: VaultWithdrawProps) => {
   const {
     symbol,
@@ -86,6 +88,7 @@ export const VaultWithdraw = ({
 
   const isWithdrawDisabled =
     !isEvmConnected ||
+    isPaused ||
     !withdrawInput ||
     isWithdrawing ||
     !maxRedeemableShares ||

@@ -11,6 +11,7 @@ import {
   VaultWithdraw,
   VaultDeposit,
   WithdrawRequestsTable,
+  VaultPaused,
 } from "@/components";
 import { useMemo } from "react";
 
@@ -42,6 +43,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
     previewDeposit,
     data: {
       tvl,
+      isPaused,
       maxRedeemableShares,
       shareBalance: userShares,
       assetBalance: userVaultAssets,
@@ -126,6 +128,14 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
+        {/* Warning box for paused vault */}
+        {isPaused && (
+          <VaultPaused
+            title={vaultConfig.copy.paused.title}
+            description={vaultConfig.copy.paused.description}
+          />
+        )}
+
         <dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-4">
           <Card variant="secondary" className="text-center">
             <dt className="text-base text-black">Your Balance</dt>
@@ -183,6 +193,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
         )}
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VaultDeposit
+            isPaused={isPaused ?? false}
             vaultConfig={vaultConfig}
             userTokenBalance={userTokenBalance.toString() ?? "0"}
             isConnected={isConnected}
@@ -211,6 +222,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           />
 
           <VaultWithdraw
+            isPaused={isPaused ?? false}
             vaultConfig={vaultConfig}
             maxRedeemableShares={maxRedeemableShares}
             previewRedeem={previewRedeem}

@@ -8,6 +8,7 @@ import { type VaultConfig } from "@/context";
 import { type PreviewTransactionData } from "@/hooks";
 
 interface VaultDepositProps {
+  isPaused: boolean;
   vaultConfig: VaultConfig;
   userTokenBalance: string | undefined;
   isConnected: boolean;
@@ -18,6 +19,7 @@ interface VaultDepositProps {
 }
 
 export const VaultDeposit = ({
+  isPaused,
   vaultConfig,
   userTokenBalance,
   isConnected,
@@ -66,6 +68,7 @@ export const VaultDeposit = ({
     !isConnected ||
     !depositInput ||
     isDepositing ||
+    isPaused ||
     !userTokenBalance ||
     parseFloat(depositInput) > parseFloat(userTokenBalance) ||
     parseFloat(depositInput) <= 0;

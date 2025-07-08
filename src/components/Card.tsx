@@ -9,6 +9,7 @@ const cardVariants = cva(
       variant: {
         primary: "bg-primary-light border-2 border-primary/40 ",
         secondary: "border-accent-purple/40 bg-accent-purple-light border-2",
+        warning: "bg-yellow-50 border-2 border-yellow-400",
       },
       isHoverable: {
         true: " hover:shadow-lg hover:shadow-primary  active:scale-95 active:shadow-inner",
