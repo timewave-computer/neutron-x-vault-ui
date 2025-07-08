@@ -7,13 +7,10 @@
       "vaultAddress": "0x58e3e5eeae41c4ab8f954189dc9daef8ac7a17f9",
       "transactionConfirmationTimeout": 600000,
       "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      "startBlock": 22837730,
-      "explorerUrl": "https://etherscan.io"
+      "startBlock": 22837730
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 22837730,
-      "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
         "denom": "ibc/B559A80D62249C8AA07A380E2A2BEA6E5CA9A6F079C912C3A9E9B494105E4F81",
         "decimals": 6
@@ -23,16 +20,6 @@
     "copy": {
       "name": "USDC Test 1",
       "description": "Deposit USDC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
-      "deposit": {
-        "title": "Deposit",
-        "description": "Deposit tokens to start earning yield.",
-        "cta": "Deposit"
-      },
-      "withdraw": {
-        "title": "Withdraw",
-        "description": "Convert shares back to USDC on Neutron mainnet.",
-        "cta": "Withdraw"
-      },
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
@@ -64,13 +51,10 @@
       "vaultAddress": "0x9fe5b9c7ddbd26d0dc93634e15eb1a5d34c85493",
       "transactionConfirmationTimeout": 600000,
       "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494",
-      "startBlock": 22837541,
-      "explorerUrl": "https://etherscan.io"
+      "startBlock": 22837541
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 27269163,
-      "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
         "denom": "ibc/B7BF60BB54433071B49D586F54BD4DED5E20BEFBBA91958E87488A761115106B",
         "decimals": 8
@@ -80,16 +64,6 @@
     "copy": {
       "name": "LBTC Test 2",
       "description": "Deposit LBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
-      "deposit": {
-        "title": "Deposit",
-        "description": "Deposit tokens to start earning yield.",
-        "cta": "Deposit"
-      },
-      "withdraw": {
-        "title": "Withdraw",
-        "description": "Convert shares back to LBTC on Neutron mainnet.",
-        "cta": "Withdraw"
-      },
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
@@ -121,13 +95,10 @@
       "vaultAddress": "0x1c2d8f447167fa7d28b2ec869df9d320aa2e6a71",
       "transactionConfirmationTimeout": 600000,
       "tokenAddress": "0x8236a87084f8b84306f72007f36f2618a5634494",
-      "startBlock": 22783642,
-      "explorerUrl": "https://etherscan.io"
+      "startBlock": 22783642
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 27269163,
-      "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
         "denom": "ibc/B7BF60BB54433071B49D586F54BD4DED5E20BEFBBA91958E87488A761115106B",
         "decimals": 8
@@ -137,16 +108,6 @@
     "copy": {
       "name": "LBTC Test 1",
       "description": "Deposit LBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
-      "deposit": {
-        "title": "Deposit",
-        "description": "Deposit tokens to start earning yield.",
-        "cta": "Deposit"
-      },
-      "withdraw": {
-        "title": "Withdraw",
-        "description": "Convert shares back to LBTC on Neutron mainnet.",
-        "cta": "Withdraw"
-      },
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
@@ -178,13 +139,10 @@
       "vaultAddress": "0x3EA82BDA12e3cba18E4A9fD0cf7DE2fB78cA4d32",
       "transactionConfirmationTimeout": 600000,
       "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "startBlock": 22694852,
-      "explorerUrl": "https://etherscan.io"
+      "startBlock": 22694852
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 27269163,
-      "explorerUrl": "https://neutron.celat.one/neutron-1",
       "token": {
         "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
         "decimals": 6
@@ -194,16 +152,6 @@
     "copy": {
       "name": "WBTC Test 1",
       "description": "Deposit WBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
-      "deposit": {
-        "title": "Deposit",
-        "description": "Deposit tokens to start earning yield.",
-        "cta": "Deposit"
-      },
-      "withdraw": {
-        "title": "Withdraw",
-        "description": "Convert shares back to WTBC on Neutron mainnet.",
-        "cta": "Withdraw"
-      },
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
@@ -235,13 +183,10 @@
       "vaultAddress": "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98",
       "transactionConfirmationTimeout": 600000,
       "tokenAddress": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "startBlock": 22577826,
-      "explorerUrl": "https://etherscan.io"
+      "startBlock": 22577826
     },
     "cosmos": {
       "chainId": "neutron-1",
-      "startBlock": 0,
-      "explorerUrl": "https://neutron.celat.one/neutron-1",
       "clearingQueueAddress": "neutron14swndagawqqtq6mh0z7uyfznw2lpqh3eu4zs4cwxuvdhpdaf944qqvq2mp",
       "token": {
         "denom": "ibc/0E293A7622DC9A6439DB60E6D234B5AF446962E27CA3AB44D0590603DFF6968E",
@@ -251,16 +196,6 @@
     "copy": {
       "name": "Mock WBTC Vault",
       "description": "Deposit WBTC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
-      "deposit": {
-        "title": "Deposit",
-        "description": "Deposit tokens to start earning yield.",
-        "cta": "Deposit"
-      },
-      "withdraw": {
-        "title": "Withdraw",
-        "description": "Convert shares back to WTBC on Neutron mainnet.",
-        "cta": "Withdraw"
-      },
       "depositInProgress": {
         "title": "Your Funds are Working",
         "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],

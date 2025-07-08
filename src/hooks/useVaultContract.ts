@@ -72,18 +72,18 @@ export function useVaultContract({
         address: vaultAddress as Address,
       },
       {
-        // redemption rate
         abi: valenceVaultABI,
-        functionName: "redemptionRate",
+        functionName: "vaultState",
         address: vaultAddress as Address,
+        args: [],
       },
     ],
   });
   const tokenDecimals = vaultMetadataQuery.data?.[0]?.result ?? 0;
   const shareDecimals = vaultMetadataQuery.data?.[1]?.result ?? 0;
   const tvl = vaultMetadataQuery.data?.[2]?.result;
-  const redemptionRate = vaultMetadataQuery.data?.[3]?.result;
-
+  const vaultState = vaultMetadataQuery.data?.[3]?.result;
+  const isVaultPaused = vaultState?.[0];
   const aprQuery = useQuery({
     queryFn: async () => {
       if (!vaultConfig) throw new Error("Vault config not found");
@@ -429,7 +429,7 @@ export function useVaultContract({
     shareDecimals: shareDecimals,
     data: {
       tvl: formatBigInt(tvl, tokenDecimals),
-      redemptionRate: formatBigInt(redemptionRate, shareDecimals),
+      isPaused: true,
       maxRedeemableShares: formatBigInt(maxRedeemableShares, shareDecimals),
       shareBalance: formatBigInt(shareBalance ?? BigInt(0), shareDecimals),
       assetBalance: formatBigInt(userAssetAmount ?? BigInt(0), tokenDecimals),
@@ -469,7 +469,7 @@ interface UseVaultContractReturnValue {
   shareDecimals: number;
   data: {
     tvl?: string;
-    redemptionRate?: string;
+    isPaused?: boolean;
     maxRedeemableShares?: string;
     shareBalance: string;
     assetBalance: string;

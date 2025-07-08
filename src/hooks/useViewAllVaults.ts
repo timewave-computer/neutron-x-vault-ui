@@ -46,12 +46,6 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
             functionName: "totalSupply",
             args: [],
           },
-          {
-            abi: valenceVaultABI,
-            address: vault.evm.vaultAddress,
-            functionName: "redemptionRate",
-            args: [],
-          },
         ],
       });
 
@@ -62,7 +56,6 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
       const shareDecimals = Number(generalVaultData[1].result);
       const tvl = generalVaultData[2].result;
       const totalShares = generalVaultData[3].result;
-      const redemptionRate = generalVaultData[4].result;
       if (!tokenDecimals || !shareDecimals) {
         // if these are undefined, unit conversions cannot be done
         throw new Error("Failed to fetch all vault data");
@@ -106,10 +99,6 @@ export function useViewAllVaults(): UseViewAllVaultsReturnValue {
         tvl: formatBigInt(tvl ?? BigInt(0), tokenDecimals),
         userVaultShares: formatBigInt(userVaultShares, shareDecimals),
         userVaultAssets: formatBigInt(userVaultAssets, tokenDecimals),
-        redemptionRate: formatBigInt(
-          redemptionRate ?? BigInt(0),
-          shareDecimals,
-        ),
       };
       return result;
     },
@@ -172,7 +161,6 @@ export type VaultSummaryData = VaultConfig & {
   userVaultShares: string;
   userVaultAssets: string;
   tvl: string;
-  redemptionRate: string;
 };
 
 export type UseViewAllVaultsReturnValue = {
