@@ -429,7 +429,7 @@ export function useVaultContract({
     shareDecimals: shareDecimals,
     data: {
       tvl: formatBigInt(tvl, tokenDecimals),
-      isPaused: true,
+      isPaused: isVaultPaused,
       maxRedeemableShares: formatBigInt(maxRedeemableShares, shareDecimals),
       shareBalance: formatBigInt(shareBalance ?? BigInt(0), shareDecimals),
       assetBalance: formatBigInt(userAssetAmount ?? BigInt(0), tokenDecimals),
