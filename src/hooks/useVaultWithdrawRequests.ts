@@ -54,12 +54,7 @@ export const useVaultWithdrawRequests = ({
             item.id,
           );
 
-          console.log("assetAmount", assetAmount);
-          console.log("tokenDecimals", tokenDecimals);
-
           const convertedAssetAmount = formatBigInt(assetAmount, tokenDecimals);
-
-          console.log("convertedAssetAmount", convertedAssetAmount);
 
           return {
             ...item,
