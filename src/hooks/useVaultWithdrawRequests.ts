@@ -54,11 +54,13 @@ export const useVaultWithdrawRequests = ({
             item.id,
           );
 
+          const convertedAssetAmount = formatBigInt(assetAmount, tokenDecimals);
+
           return {
             ...item,
             isCompleted,
             isError,
-            convertedAssetAmount: formatBigInt(assetAmount, tokenDecimals),
+            convertedAssetAmount,
           };
         }),
       );

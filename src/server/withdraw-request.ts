@@ -21,7 +21,7 @@ export async function getWithdrawRequests(
 ) {
   const data = await fetchFromIndexer(
     vaultAddress,
-    `withdrawRequestsByAddress/${ownerAddress}`,
+    `withdrawRequests?owner_address=${ownerAddress}`,
   );
   const parsedData = responseSchema.parse(data);
   return parsedData.data;

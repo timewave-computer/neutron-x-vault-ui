@@ -3,3 +3,4 @@ export * from "./validation";
 export * from "./time-format";
 export * from "./format-numbers";
 export * from "./shorten-address";
+export * from "./apr-format";
