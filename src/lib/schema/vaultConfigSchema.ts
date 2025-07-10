@@ -50,6 +50,7 @@ const cosmosSchema = z.object({
 export const vaultConfigSchema = z.object({
   vaultId: z.string(),
   symbol: z.string(),
+  displayDecimals: z.number().default(2),
   evm: evmSchema,
   cosmos: cosmosSchema,
   copy: z.object({
@@ -103,5 +104,4 @@ export const vaultConfigSchema = z.object({
     }),
   }),
   aprRequest: aprRequestSchema,
-  displayDecimals: z.number().default(2),
 });

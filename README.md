@@ -116,6 +116,7 @@ _NOTE:_ Not all fields have to be specified in the config. Some fields have reso
 
 - `vaultId`: A unique identifier for the vault used internally by the application
 - `symbol`: The symbol of the token accepted by the vault (e.g., "USDC", "ETH")
+- `displayDecimals`: Precision of display value of amounts.
 
 ### EVM Configuration
 
