@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useVaultContract, useTokenBalances, useAccounts } from "@/hooks";
-import { formatNumberString } from "@/lib";
+import { formatApr, formatNumberString } from "@/lib";
 import { useToast, useVaultsConfig } from "@/context";
 import {
   Card,
@@ -161,7 +161,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
           <Card variant="secondary" className="text-center">
             <dt className="text-base text-black">APR</dt>
             <dd className="mt-2 text-2xl font-beast text-secondary text-wrap break-words">
-              {apr ? `${apr} %` : "N/A"}
+              {formatApr(apr)}
             </dd>
           </Card>
         </dl>

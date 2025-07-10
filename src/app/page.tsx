@@ -2,7 +2,7 @@
 
 import { Card } from "@/components";
 import { useViewAllVaults } from "@/hooks";
-import { formatNumberString, truncateAddress } from "@/lib";
+import { formatApr, formatNumberString, truncateAddress } from "@/lib";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 export default function Home() {
@@ -42,9 +42,7 @@ export default function Home() {
                 displayDecimals: vault.displayDecimals,
               });
 
-              const apr = vault.aprPercentage
-                ? `${vault.aprPercentage} %`
-                : "0";
+              const apr = formatApr(vault.aprPercentage);
 
               const userVaultAssets = formatNumberString(
                 vault.userVaultAssets,

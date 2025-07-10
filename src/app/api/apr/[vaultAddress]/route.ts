@@ -48,18 +48,33 @@ export async function GET(
 
     const parsedData = ratesResponseSchema.parse(data);
 
-    if (parsedData.data.length === 0) {
-      return NextResponse.json({ error: "No rates found" }, { status: 404 });
+    if (parsedData.data.length < 2) {
+      return NextResponse.json(
+        { error: "Not enough rate updates" },
+        { status: 400 },
+      );
     }
 
-    let finalOverInitial = 1;
-    if (parsedData.data.length >= 2) {
-      const initialRate = parseFloat(parsedData.data[0].rate);
-      const finalRate = parseFloat(
-        parsedData.data[parsedData.data.length - 1].rate,
+    const firstUpdate = parsedData.data[0];
+    const lastUpdate = parsedData.data[parsedData.data.length - 1];
+
+    const isMeetsMinimumTimeRange = checkMinimumTimeRange({
+      timestamps: {
+        from: firstUpdate.block_timestamp,
+        to: lastUpdate.block_timestamp,
+      },
+      minimumHours: 24 * 3, // 5 days
+    });
+
+    if (!isMeetsMinimumTimeRange) {
+      return NextResponse.json(
+        { error: "Not enough time has passed to calculate APR" },
+        { status: 400 },
       );
-      finalOverInitial = finalRate / initialRate;
     }
+    const firstRate = parseFloat(firstUpdate.rate);
+    const lastRate = parseFloat(lastUpdate.rate);
+    const finalOverInitial = lastRate / firstRate;
 
     const apr = Math.pow(finalOverInitial, 365 / APR_RANGE_IN_DAYS) - 1;
 
@@ -71,3 +86,17 @@ export async function GET(
     );
   }
 }
+
+const checkMinimumTimeRange = ({
+  timestamps: { from, to },
+  minimumHours,
+}: {
+  timestamps: {
+    from: string;
+    to: string;
+  };
+  minimumHours: number;
+}) => {
+  const timeDifference = new Date(to).getTime() - new Date(from).getTime();
+  return timeDifference >= 1000 * 60 * 60 * minimumHours;
+};
