@@ -11,7 +11,7 @@ import { type CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export const useVaultWithdrawRequests = ({
   vaultAddress,
-
+  ownerAddress,
   tokenDecimals,
   clearingQueueAddress,
   cosmosChainId,
@@ -22,7 +22,6 @@ export const useVaultWithdrawRequests = ({
   clearingQueueAddress: string;
   cosmosChainId: string;
 }) => {
-  const ownerAddress = "0x510c4a1d637ff374399826f421003b775dc3e8dc";
   const config = useConfig();
 
   const { data: neutronClient } = useCosmWasmClient({

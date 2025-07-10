@@ -21,17 +21,7 @@ const ratesResponseSchema = z.object({
  */
 
 const APR_RANGE_IN_DAYS = 30;
-
-const getTimestampsForRange = (days: number) => {
-  const endTimestamp = new Date().toISOString();
-  const startTimestamp = new Date(
-    Date.now() - days * 24 * 60 * 60 * 1000,
-  ).toISOString();
-  return {
-    from: startTimestamp,
-    to: endTimestamp,
-  };
-};
+const MINIMUM_HOURS_FOR_APR_CALCULATION = 24 * 3; // 3 days
 
 export async function GET(
   request: Request,
@@ -63,7 +53,7 @@ export async function GET(
         from: firstUpdate.block_timestamp,
         to: lastUpdate.block_timestamp,
       },
-      minimumHours: 24 * 3, // 5 days
+      minimumHours: MINIMUM_HOURS_FOR_APR_CALCULATION,
     });
 
     if (!isMeetsMinimumTimeRange) {
@@ -86,6 +76,17 @@ export async function GET(
     );
   }
 }
+
+const getTimestampsForRange = (days: number) => {
+  const endTimestamp = new Date().toISOString();
+  const startTimestamp = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  return {
+    from: startTimestamp,
+    to: endTimestamp,
+  };
+};
 
 const checkMinimumTimeRange = ({
   timestamps: { from, to },
