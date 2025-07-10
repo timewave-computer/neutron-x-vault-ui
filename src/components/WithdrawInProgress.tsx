@@ -3,7 +3,7 @@ import React from "react";
 import { Card, TimelineAnimation } from "@/components";
 import { useStargateClient } from "graz";
 import { useQuery } from "@tanstack/react-query";
-import { shortenAddress, microToBase } from "@/lib/helper";
+import { shortenAddress, microToBase, formatNumberString } from "@/lib/helper";
 import { QUERY_KEYS } from "@/const";
 import { VaultConfig } from "@/context";
 import { type WithdrawRequestData } from "@/hooks";
@@ -82,7 +82,10 @@ export const WithdrawInProgress = ({
                   </a>
                 </p>
                 <p className="text-sm font-light text-gray-500 pb-2">
-                  Withdraw Quantity: {convertedAssetAmount} {symbol}
+                  Withdraw Quantity:{" "}
+                  {formatNumberString(convertedAssetAmount, symbol, {
+                    displayDecimals: _vaultConfig.displayDecimals,
+                  })}
                 </p>
 
                 <p className="mt-2">

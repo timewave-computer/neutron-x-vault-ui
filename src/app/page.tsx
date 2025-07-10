@@ -39,7 +39,7 @@ export default function Home() {
           ) : (
             vaults.map((vault) => {
               const tvl = formatNumberString(vault.tvl, vault.symbol, {
-                displayDecimals: 2,
+                displayDecimals: vault.displayDecimals,
               });
 
               const apr = vault.aprPercentage
@@ -50,7 +50,7 @@ export default function Home() {
                 vault.userVaultAssets,
                 vault.symbol,
                 {
-                  displayDecimals: 2,
+                  displayDecimals: vault.displayDecimals,
                 },
               );
 

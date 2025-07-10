@@ -103,4 +103,5 @@ export const vaultConfigSchema = z.object({
     }),
   }),
   aprRequest: aprRequestSchema,
+  displayDecimals: z.number().default(2),
 });

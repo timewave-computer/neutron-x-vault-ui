@@ -57,19 +57,19 @@ export default function VaultPage({ params }: { params: { id: string } }) {
   });
 
   const userSharesFormatted = formatNumberString(userShares, "shares", {
-    displayDecimals: 2,
+    displayDecimals: vaultConfig?.displayDecimals,
   });
 
   const userVaultAssetsFormatted = formatNumberString(
     userVaultAssets,
     tokenSymbol,
     {
-      displayDecimals: 2,
+      displayDecimals: vaultConfig?.displayDecimals,
     },
   );
 
   const vaultTvlFormatted = formatNumberString(tvl, tokenSymbol, {
-    displayDecimals: 2,
+    displayDecimals: vaultConfig?.displayDecimals,
   });
 
   const isLoading = isLoadingContract;
@@ -185,9 +185,7 @@ export default function VaultPage({ params }: { params: { id: string } }) {
             />
             <WithdrawRequestsTable
               withdrawRequests={withdrawRequests.data}
-              vaultSymbol={vaultConfig.symbol}
-              cosmosExplorerUrl={vaultConfig.cosmos.explorerUrl}
-              clearingQueueAddress={vaultConfig.cosmos.clearingQueueAddress}
+              vaultConfig={vaultConfig}
             />
           </>
         )}

@@ -133,7 +133,7 @@ export const TimelineAnimation = ({
           return (
             <div
               key={index}
-              className={`text-xs absolute transform -translate-x-1/2 ${
+              className={`text-nowrap text-xs absolute transform -translate-x-1/2 ${
                 index === currentStepIndex
                   ? "text-accent-purple"
                   : "text-gray-400"
