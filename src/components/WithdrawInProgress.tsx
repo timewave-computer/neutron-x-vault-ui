@@ -85,6 +85,7 @@ export const WithdrawInProgress = ({
                   Withdraw Quantity:{" "}
                   {formatNumberString(convertedAssetAmount, symbol, {
                     displayDecimals: _vaultConfig.displayDecimals,
+                    useSignificantFigures: true,
                   })}
                 </p>
 

@@ -87,6 +87,7 @@ export const WithdrawRequestsTable: React.FC<WithdrawRequestsTableProps> = ({
                           vaultSymbol,
                           {
                             displayDecimals: displayDecimals,
+                            useSignificantFigures: true,
                           },
                         )}
                       </td>
