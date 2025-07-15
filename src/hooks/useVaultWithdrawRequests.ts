@@ -4,7 +4,6 @@ import { QUERY_KEYS } from "@/const/query-keys";
 import { useConfig } from "wagmi";
 import { valenceVaultABI } from "@/const";
 import { readContract } from "@wagmi/core";
-import { parseUnits } from "viem";
 import { formatBigInt } from "@/lib";
 import { useCosmWasmClient } from "graz";
 import { type CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
@@ -41,11 +40,12 @@ export const useVaultWithdrawRequests = ({
       const data = await getWithdrawRequests(ownerAddress, vaultAddress);
       return Promise.all(
         data.map(async (item) => {
+          const parsedAmount = BigInt(item.amount);
           const assetAmount = await readContract(config, {
             address: vaultAddress as `0x${string}`,
             abi: valenceVaultABI,
             functionName: "convertToAssets",
-            args: [parseUnits(item.amount, tokenDecimals)],
+            args: [parsedAmount],
           });
 
           const { isCompleted, isError } = await getObligationStatus(
