@@ -27,6 +27,7 @@ export const WithdrawRequestsTable: React.FC<WithdrawRequestsTableProps> = ({
 
   const {
     cosmos: { explorerUrl: cosmosExplorerUrl, clearingQueueAddress },
+    evm: { explorerUrl: evmExplorerUrl },
     symbol: vaultSymbol,
     displayDecimals,
   } = vaultConfig;
@@ -70,7 +71,7 @@ export const WithdrawRequestsTable: React.FC<WithdrawRequestsTableProps> = ({
                   <tr className="text-accent-purple font-medium mb-2">
                     <th className="text-left py-2 pr-3 ">ID</th>
                     <th className="text-left py-2 px-3  ">Amounts</th>
-                    <th className="text-left py-2 px-3  ">Block #</th>
+                    <th className="text-left py-2 px-3  ">Ethereum Block</th>
                     <th className="text-left py-2 pl-3 ">Status</th>
                   </tr>
                 </thead>
@@ -93,7 +94,7 @@ export const WithdrawRequestsTable: React.FC<WithdrawRequestsTableProps> = ({
                       </td>
                       <td className="py-2 px-3 text-gray-600">
                         <a
-                          href={`${cosmosExplorerUrl}/blocks/${request.block_number}`}
+                          href={`${evmExplorerUrl}/block/${request.block_number}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline"
