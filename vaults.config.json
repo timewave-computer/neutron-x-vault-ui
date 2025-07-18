@@ -1,5 +1,47 @@
 [
   {
+    "vaultId": "usdc-test-2",
+    "symbol": "USDC",
+    "evm": {
+      "chainId": 1,
+      "vaultAddress": "0x94c893c7ffe53a176f42d24d2e9e0b67bc7d4360",
+      "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    },
+    "cosmos": {
+      "chainId": "neutron-1",
+      "token": {
+        "denom": "ibc/B559A80D62249C8AA07A380E2A2BEA6E5CA9A6F079C912C3A9E9B494105E4F81",
+        "decimals": 6
+      },
+      "clearingQueueAddress": "neutron1fnx6khnc4g869ynzuesjmpchk9jde3s8698e39acp05nl0fhjlwqhcvx8x"
+    },
+    "copy": {
+      "name": "USDC Test 2",
+      "description": "Deposit USDC and let Valence’s cross-chain vault automatically handle the bridging from Ethereum to Neutron via IBC Eureka, depositing to an Astroport liquidity position, and auto-compounding of yield.",
+      "depositInProgress": {
+        "title": "Your Funds are Working",
+        "steps": ["Ethereum", "IBC Bridge", "Neutron", "Astroport Vault"],
+        "description": "Valence automatically bridges your USDC from Ethereum mainnet to Neutron via IBC Eureka, deposits to an Astroport liquidity position, and earns yield until you initiate a withdrawal."
+      },
+      "withdrawInProgress": {
+        "title": "Withdraw in Progress",
+        "description": "Your vault shares are being transferred to your Neutron account. This may take a few minutes.",
+        "steps": ["Astroport Supervault", "Neutron Account"]
+      },
+      "withdrawCompleted": {
+        "title": "Withdraw Completed",
+        "description": "Your funds have been transferred to your Neutron account."
+      }
+    },
+    "aprRequest": {
+      "type": "api",
+      "url": "/api/apr/0x94c893c7ffe53a176f42d24d2e9e0b67bc7d4360",
+      "method": "GET",
+      "headers": {},
+      "body": {}
+    }
+  },
+  {
     "vaultId": "usdc-test",
     "symbol": "USDC",
     "evm": {
