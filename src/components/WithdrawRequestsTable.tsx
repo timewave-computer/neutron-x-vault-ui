@@ -71,7 +71,7 @@ export const WithdrawRequestsTable: React.FC<WithdrawRequestsTableProps> = ({
                   <tr className="text-accent-purple font-medium mb-2">
                     <th className="text-left py-2 pr-3 ">ID</th>
                     <th className="text-left py-2 px-3  ">Amounts</th>
-                    <th className="text-left py-2 px-3  ">Ethereum Block</th>
+                    <th className="text-left py-2 px-3  ">Block #</th>
                     <th className="text-left py-2 pl-3 ">Status</th>
                   </tr>
                 </thead>
